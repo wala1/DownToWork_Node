@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         // isAdmin: user.isAdmin,
-        // token: generateToken(user._id),
+        token: generateToken(user._id),
         })
     } else {
         res.status(400)
@@ -56,6 +56,8 @@ const registerUser = asyncHandler(async (req, res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
+            token: generateToken(user._id),
+
 
             })
         } else {
@@ -63,6 +65,15 @@ const registerUser = asyncHandler(async (req, res) => {
             throw new Error('Invalid email or password')
         }
         });
+
+        ////generate token
+
+        const generateToken = (id) => {
+            return jwt.sign({ id }, process.env.JWT_SECRET, {
+                expiresIn: '30d',
+            })
+            }
+
 
 
     module.exports = {
