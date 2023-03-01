@@ -8,6 +8,8 @@ const logger = require('morgan');
 const mongodbConnection = require('./config/mongoconnection.json');
 const indexRouter = require('./routes/index');
 const topicsRouter = require('./routes/topic');
+const usersRouter = require('./routes/topic');
+
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -23,21 +25,21 @@ dotenv.config();
   })();
 
 
+// mongoose.connect(
+//     mongodbConnection.url, {
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true,
+//       })
+//       .then(() => {
+//         console.log("DataBase Connected");
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       }
+// );
 
 const app = express();
-//connect to database
-mongoose.connect(
-    mongodbConnection.url, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
-      .then(() => {
-        console.log("DataBase Connected");
-      })
-      .catch((err) => {
-        console.log(err);
-      }
-);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
