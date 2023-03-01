@@ -75,10 +75,13 @@ const registerUser = asyncHandler(async (req, res) => {
             })
             }
 
-
+        const GetUser = asyncHandler(async (req, res) => {
+            res.status(200).json(req.user)
+            });
 
     module.exports = {
         registerUser,
         LoginUser,
+        GetUser,
       
       }
