@@ -67,11 +67,7 @@ const registerUser = asyncHandler(async (req, res) => {
             throw new Error('Invalid email or password')
         }
         });
-        //logout user
         
-       
-
-
         ////generate token
 
         const generateToken = (id) => {
@@ -88,5 +84,4 @@ const registerUser = asyncHandler(async (req, res) => {
         registerUser,
         LoginUser,
         GetUser,
-      
       }
