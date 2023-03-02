@@ -51,6 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const LoginUser = asyncHandler(async (req, res) => {
         const { email, password } = req.body
+        console.log(req.body);
         const user = await User.findOne({ email })
 
         if (user && (await bcrypt.compare(password, user.password))) {
@@ -66,6 +67,10 @@ const registerUser = asyncHandler(async (req, res) => {
             throw new Error('Invalid email or password')
         }
         });
+        //logout user
+        
+       
+
 
         ////generate token
 
