@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema(
     DateOfBirth: {
       type: Date,
       format: 'dd-mm-yyyy',
-      required: [true, 'Please add a DateOfBirth'],
+      // required: [true, 'Please add a DateOfBirth'],
     },
     isOwner : {
       type : Boolean,

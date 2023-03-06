@@ -9,9 +9,9 @@ const User = require('../models/user')
 
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password,DateOfBirth } = req.body
+    const { name, email, password } = req.body
 
-    if(!name || !email || !password || !DateOfBirth) {
+    if(!name || !email || !password ) {
         res.status(400)
         throw new Error('Please enter all fields')
     }
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         name,
         email,
-        DateOfBirth,
+        // DateOfBirth,
         password: hashedPassword,
     })
     
@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        DateOfBirth: user.DateOfBirth,
+        // DateOfBirth: user.DateOfBirth,
         //token: generateToken(user._id),
         })
     } else {
@@ -50,7 +50,7 @@ const registerUser = asyncHandler(async (req, res) => {
     ////login user
 
     const LoginUser = asyncHandler(async (req, res) => {
-        const { email, password } = req.body
+        const { email, password } = req.body;
         console.log(req.body);
         const user = await User.findOne({ email })
 
@@ -80,8 +80,34 @@ const registerUser = asyncHandler(async (req, res) => {
             res.status(200).json(req.user)
             });
 
+        
+        /// reset password 
+        const resetPassword = async(req,res,next) => {
+            const {email , password , confirm_password} = req.body;
+            let user = await User.findOne({ email })    
+
+            if(!user){
+                 return res.status(400).send("This user does not exist");
+            }      
+
+            if (password === confirm_password) {
+                const salt = await bcrypt.genSalt(10)
+                const hashedPassword = await bcrypt.hash(password, salt)
+                user.set({
+                    password : hashedPassword,
+                })
+           } else {
+                 return res.status(400).send("You entered different passwords");
+           }
+            const result = await user.save();
+            res.send(result);
+
+        }
+    
+
     module.exports = {
         registerUser,
         LoginUser,
         GetUser,
+        resetPassword
       }

@@ -8,7 +8,7 @@ const logger = require('morgan');
 const mongodbConnection = require('./config/mongoconnection.json');
 const indexRouter = require('./routes/index');
 const topicsRouter = require('./routes/topic');
-const usersRouter = require('./routes/topic');
+const usersRouter = require('./routes/users');
 
 const dotenv = require('dotenv');
 
