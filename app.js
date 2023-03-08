@@ -55,7 +55,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
-app.use('/posts', postRouter);
+app.use('/post', postRouter);
 
 
 //creation du serveur
