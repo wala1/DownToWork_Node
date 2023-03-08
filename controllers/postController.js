@@ -25,20 +25,15 @@ exports.find = (req , res , next ) => {
     .then((posts) => res.send(posts))
     .catch((err)=> res.send({message : "Error retrieving posts"  , error : err}))
 } 
-//*************************getById ********************/
 
-function getById ( req , res , next ) {
-User.findOne({_id : req.params.id}) 
-.then((post) => res.status(200).json(post))
-.catch((err) => res.status(404).json({err}))
-} 
+//**************************** Endpoint to delete a post **************** */
 
-//****************************getAll**************** */
-
-
-
+exports.delete = (req, res)=>{
+    const id = req.params.id;
+    Post.findByIdAndDelete(id)
+    .then(post => { (!post)?  res.status(404).send({ message : `Cannot Delete with id ${id}. Maybe id is wrong`})
+    :res.send({ message : "post was deleted successfully!"}) })
+    .catch(err =>{res.status(500).send({message: "Could not delete User with id=" + id  , error : err}); });
+}
 
 
-
-
-  module.exports = { getAll , getById}
