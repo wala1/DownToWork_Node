@@ -33,7 +33,20 @@ exports.delete = (req, res)=>{
     Post.findByIdAndDelete(id)
     .then(post => { (!post)?  res.status(404).send({ message : `Cannot Delete with id ${id}. Maybe id is wrong`})
     :res.send({ message : "post was deleted successfully!"}) })
-    .catch(err =>{res.status(500).send({message: "Could not delete User with id=" + id  , error : err}); });
+    .catch(err =>{res.status(500).send({message: "Could not delete post with id=" + id  , error : err}); });
 }
 
 
+//**************************** Endpoint to update a Post **************** */
+exports.update = (req, res)=>{
+
+    if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "post with new informations must be provided"})}
+
+    const id = req.params.id;
+
+    //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
+    //The { new: true } option tells Mongoose to return the updated document instead of the original one.
+    User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
+    .then(post => {(!post) ? res.status(404).send({ message : `Cannot Update post with ${id}. Maybe post not found!`}) :res.send(post)})
+    .catch(err => res.status(500).send({ message : "Error Update user information" , error : err}))
+}
