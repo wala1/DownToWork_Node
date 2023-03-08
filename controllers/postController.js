@@ -43,7 +43,6 @@ exports.update = (req, res)=>{
     if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "post with new informations must be provided"})}
 
     const id = req.params.id;
-
     //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
     //The { new: true } option tells Mongoose to return the updated document instead of the original one.
     User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
