@@ -94,6 +94,12 @@ const registerUser = asyncHandler(async (req, res) => {
             res.status(200).json(req.user)
             });
 
+
+    //****************** update  *****************/
+    
+
+
+
     module.exports = {
         registerUser,
         LoginUser,

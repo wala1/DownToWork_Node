@@ -3,39 +3,37 @@ const Post = require ('../models/Post')
 
 
 //*****************************Create ****************/
-function add (req , res , next ) {
-    console.log(req.body)
-   
-    const newPost  = new Post ({...req.body})
+exports.add = (req , res , next ) => {
+    
+   if(Object.keys(req.body).length === 0){
+        res.status(400).send({ message : "Content can not be emtpy!"});
+        return;
+    }
+    const newPost  = new Post({...req.body})
     newPost.save()
-    .then(()=>res.status(201).json({message:"Post added with sucess !"}))
-    .catch(err => res.status(400).json({err}));
-
+    .then((post)=>res.status(201).json({message:"Post added with sucess !" , post }))
+    .catch(err => res.status(400).json({message : err.message || "Some error occurred while creating a Post"}));
+  
   }
-
-//***************************** Read ******************/
-function getAll (req , res , next ) {
-
-    User.find()
-    .then(posts =>res.status(201).json(posts))
-    .catch(err => res.status(400).json({err}));
-
-  }
-
-//*************************getById ********************/
-
-function getById ( req , res , next ) {
-User.findOne({_id : req.params.id}) 
-.then((post) => res.status(200).json(post))
-.catch((err) => res.status(404).json({err}))
+//***************************** Enpoint to  (get All posts  - get post By Id )  ******************/
+exports.find = (req , res , next ) => {
+ 
+    const id = req.params.id ;
+    (id)? Post.findOne({_id :req.params.id })
+    .then((post) => {(post)? res.send(post):res.status(404).send({message :"Not found Post with id "+ req.params.id })})
+    .catch((err) =>res.status(500).send({ message: "Error retrieving post with id " + req.params.id , error : +err})): Post.find()
+    .then((posts) => res.send(posts))
+    .catch((err)=> res.send({message : "Error retrieving posts"  , error : err}))
 } 
 
-//****************************getAll**************** */
+//**************************** Endpoint to delete a post **************** */
+
+exports.delete = (req, res)=>{
+    const id = req.params.id;
+    Post.findByIdAndDelete(id)
+    .then(post => { (!post)?  res.status(404).send({ message : `Cannot Delete with id ${id}. Maybe id is wrong`})
+    :res.send({ message : "post was deleted successfully!"}) })
+    .catch(err =>{res.status(500).send({message: "Could not delete User with id=" + id  , error : err}); });
+}
 
 
-
-
-
-
-
-  module.exports = {add , getAll , getById}
