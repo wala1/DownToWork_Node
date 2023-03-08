@@ -54,7 +54,11 @@ const registerUser = asyncHandler(async (req, res) => {
         console.log(req.body);
         const user = await User.findOne({ email })
 
-        if (user && (await bcrypt.compare(password, user.password))) {
+        if (user 
+            && user.isConfirmed 
+            && (!user.isDeleted)
+            &&(!user.isBlocked)
+            &&(await bcrypt.compare(password, user.password))) {
             const {password, ...userWithoutPassword} = user.toObject();
             res.json({
             user: userWithoutPassword,
@@ -62,7 +66,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
             })
-        } else {
+        } else if(user && !user.isConfirmed){
+            res.status(401).send("Please confirm your email")
+            throw new Error('Please confirm your email')
+        }else if(user && user.isDeleted){
+            res.status(401).send("Your account is deleted")
+            throw new Error('Your account is deleted')
+        }else if(user && user.isBlocked){
+            res.status(401).send("Your account is blocked")
+            throw new Error('Your account is blocked')
+        }
+        else {
             res.status(401)
             throw new Error('Invalid email or password')
         }
