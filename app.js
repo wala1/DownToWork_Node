@@ -1,12 +1,17 @@
 const express = require('express');
 const http = require ('http');
+const mongoose = require('mongoose')
 const createError = require('http-errors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const mongoose = require('mongoose');
+const mongodbConnection = require('./config/mongoconnection.json');
+const indexRouter = require('./routes/index');
+const topicsRouter = require('./routes/topic');
+const usersRouter = require('./routes/topic');
 
 const dotenv = require('dotenv');
+
 dotenv.config();
 
 (async () => {
@@ -19,9 +24,19 @@ dotenv.config();
     }
   })();
 
-const indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
+// mongoose.connect(
+//     mongodbConnection.url, {
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true,
+//       })
+//       .then(() => {
+//         console.log("DataBase Connected");
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       }
+// );
 
 const app = express();
 
@@ -37,6 +52,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
 
 //creation du serveur

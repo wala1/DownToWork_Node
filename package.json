@@ -16,12 +16,11 @@
     "http": "^0.0.1-security",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
-<<<<<<< HEAD
-    "mongoose": "^7.0.0",
-=======
+
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^6.10.0",
->>>>>>> main
+    "mongoose": "^7.0.0",
+
+
     "morgan": "~1.9.1"
   }
 }
