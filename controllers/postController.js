@@ -4,8 +4,7 @@ const Post = require ('../models/Post')
 
 //*****************************Create ****************/
 function add (req , res , next ) {
-    console.log(req.body)
-   
+  
     const newPost  = new Post ({...req.body})
     newPost.save()
     .then(()=>res.status(201).json({message:"Post added with sucess !"}))
