@@ -45,7 +45,7 @@ exports.update = (req, res)=>{
     const id = req.params.id;
     //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
     //The { new: true } option tells Mongoose to return the updated document instead of the original one.
-    User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
+    Post.findOneAndUpdate({_id: id}, {$set: req.body}, {useFindAndModify: false , new: true})
     .then(post => {(!post) ? res.status(404).send({ message : `Cannot Update post with ${id}. Maybe post not found!`}) :res.send(post)})
-    .catch(err => res.status(500).send({ message : "Error Update user information" , error : err}))
+    .catch(err => res.status(500).send({ message : "Error Update post information" , error : +err}))
 }
