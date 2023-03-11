@@ -39,6 +39,10 @@ const userSchema = mongoose.Schema(
     isConfirmed : {
       type : Boolean,
       default: false,
+    },
+    tokenPass : {
+      type : String,
+      default : ''
     }
   },
   {

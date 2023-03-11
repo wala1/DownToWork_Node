@@ -12,6 +12,7 @@ const mongodbConnection = require('./config/mongoconnection.json');
 const indexRouter = require('./routes/index');
 const topicsRouter = require('./routes/topic');
 const usersRouter = require('./routes/users');
+const courseRouter = require('./routes/course');
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
+app.use('/courses' , courseRouter);
 
 //creation du serveur
 const server = http.createServer(app); 
