@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword,resetPassword} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword,resetPassword , blockUser,unblockUser} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 
@@ -10,6 +10,8 @@ router.post('/login', LoginUser);
 router.get('/getuser', protect, GetUser);
 router.post('/forget-password', forgetPassword );
 router.post('/reset-password',resetPassword);
+router.get('/block-user/:id' , blockUser);
+router.get('/unblock-user/:id',unblockUser);
 // /* GET users listing. */
 // router.get('/', function(req, res, next) {
 //   res.send('respond with a resource');

@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Invalid user data')
     }
-    });
+});
 
     ////login user
 
@@ -139,68 +139,97 @@ const sentResetPasswordMail = async(name , email , token) => {
 }
 
 
-        /// forget password 
+/// forget password 
 
-        const forgetPassword = async(req , res , next) => {
-            try{
-                const email = req.body.email;
-                const user = await User.findOne({email});
-                if(user){
-                    console.log("hello");
-
-                    const randomstringtoken = randomstring.generate();
-                    console.log(randomstringtoken);
-                    const data = await User.updateOne({email},{$set:{tokenPass : randomstringtoken}});
-                    sentResetPasswordMail(user.name , user.email,randomstringtoken);
-                    res.status(200).send({success:true,msg:"Please check your inbox "});
-
-                }else{
-                    res.status(400).send("The given mail does not exist");
-                }
-            }catch(error){
-                res.status(400).send({success:false, msg:error.message});
-            }
+const forgetPassword = async(req , res , next) => {
+    try{
+        const email = req.body.email;
+        const user = await User.findOne({email});
+        if(user){
+            console.log("hello");
+            const randomstringtoken = randomstring.generate();
+            console.log(randomstringtoken);
+            const data = await User.updateOne({email},{$set:{tokenPass : randomstringtoken}});
+            sentResetPasswordMail(user.name , user.email,randomstringtoken);
+            res.status(200).send({success:true,msg:"Please check your inbox "});
+        }else{
+            res.status(400).send("The given mail does not exist");
         }
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+}
 
-
-        /// reset password
+/// reset password
         
-        const resetPassword = async(req, res) => {
-            try{
-                const token = req.query.token;
-                const tokenUser = await User.findOne({tokenPass : token});
-                console.log(tokenUser.email);
-                if(tokenUser){
-                    const password = req.body.password;
-                    const salt = await bcrypt.genSalt(10);
-                    const hashedPassword = await bcrypt.hash(password, salt);
-                    const userData = await User.findByIdAndUpdate({_id:tokenUser._id} , {$set:{
-                        password : hashedPassword, 
-                        tokenPass : ''
-                    }}, {new:true});
-                    res.status(200).send({success:true, msg:" Password has been reset" , data: userData});
+const resetPassword = async(req, res) => {
+    try{
+        const token = req.query.token;
+        const tokenUser = await User.findOne({tokenPass : token});
+        console.log(tokenUser.email);
+        if(tokenUser){
+            const password = req.body.password;
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            const userData = await User.findByIdAndUpdate({_id:tokenUser._id} , {$set:{
+                password : hashedPassword, 
+                tokenPass : ''
+            }}, {new:true});
+            res.status(200).send({success:true, msg:" Password has been reset" , data: userData});
 
 
-                }else{
-                    res.status(400).send({success:false, msg:"this link has bee expired"});
+        }else{
+              res.status(400).send({success:false, msg:"this link has bee expired"});
                     
-                }
-
-            }catch(error){
-                res.status(400).send({success:false, msg:error.message});
-            }
-
         }
+
+    }catch(error){
+                res.status(400).send({success:false, msg:error.message});
+    }
+}
+
+
+// block User 
+const blockUser = async(req,res) => {
+    try{
+       
+        const user = await User.findByIdAndUpdate(req.params.id , {$set:{
+            isBlocked : true
+        }} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ " is blocked" , data: user});
+        
+
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+    
+}
+// unblock User 
+const unblockUser = async(req,res) => {
+    try{
+        const user = await User.findByIdAndUpdate({_id:req.params.id} , {$set:{
+            isBlocked : false
+        }} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ " is unblocked" , data: user});
+
+
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+    
+}
+
 
 
 
 
         
-
-    module.exports = {
-        registerUser,
-        LoginUser,
-        GetUser,
-        resetPassword,
-        forgetPassword
-      }
+module.exports = {
+    registerUser,
+    LoginUser,
+    GetUser,
+    resetPassword,
+    forgetPassword,
+    blockUser,
+    unblockUser
+}
