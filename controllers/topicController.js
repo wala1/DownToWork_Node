@@ -6,9 +6,10 @@ async function TopicsList  (req , res , next )  {
 async function addTopic(req , res , next){
     let topic = new Topic({
         topicName : req.body.topicName,
-        topicImg : req.body.topicImg
+        topicImg : `http://localhost:3000/topicImage/${req.file.filename}`
     })
     topic = await topic.save();
+    console.log(req.file)
     res.send(topic);
 
 };
