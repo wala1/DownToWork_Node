@@ -80,6 +80,7 @@ const registerUser = asyncHandler(async (req, res) => {
             res.status(401)
             throw new Error('Invalid email or password')
         }
+        console.log(user);
         });
         
         ////generate token
