@@ -123,7 +123,7 @@ const sentResetPasswordMail = async(name , email , token) => {
             from : mailConfig.emailUser,
             to : email,
             subject : 'For Reset Password',
-            html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/users/reset-password?token='+token+'">  and reset your password </a>'
+            html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'
         }
         transporter.sendMail(mailOptions,function(error,info){
             if(error){
@@ -166,6 +166,7 @@ const forgetPassword = async(req , res , next) => {
 const resetPassword = async(req, res) => {
     try{
         const token = req.query.token;
+        
         const tokenUser = await User.findOne({tokenPass : token});
         console.log(tokenUser.email);
         if(tokenUser){
