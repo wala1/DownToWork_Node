@@ -53,7 +53,7 @@ app.use('/courses' , courseRouter);
 
 //creation du serveur
 const server = http.createServer(app); 
-server.listen(3002,()=>console.log("server is run")); //port
+server.listen(3001,()=>console.log("server is run")); //port
 
 
 

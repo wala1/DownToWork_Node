@@ -51,6 +51,9 @@ const userSchema = mongoose.Schema(
     tokenPass : {
       type : String,
       default : ''
+    },
+    otp : {
+      type : Number
     }
   },
   {
