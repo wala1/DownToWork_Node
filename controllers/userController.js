@@ -21,25 +21,45 @@ const mailConfig = require('../config/configMail.json');
             res.status(401).send("invalid email or password")
             throw new Error('Invalid email or password')
         }
-        console.log(user);
-        });
         
-        const userExists = await User.findOne({ email })
+        const userExists = (async () => {
+            // your code here
+            await User.findOne({ email })
+            // more code here
+          })();
+        
+       
         
         if (userExists) {
             res.status(400)
             throw new Error('User already exists')
         }
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
+        const salt = (async () => {
+            // your code here
+            await bcrypt.genSalt(10)
+            // more code here
+          })();
         
-        const user = await User.create({
-            name,
-            email,
-            // DateOfBirth,
-            password: hashedPassword,
-        })
+        
+        const hashedPassword = (async () => {
+            // your code here
+            await bcrypt.hash(password, salt)
+            // more code here
+          })();
+        
+        
+        
+        const user =(async () => {
+            // your code here
+            await User.create({
+                name,
+                email,
+                // DateOfBirth,
+                password: hashedPassword,
+            })
+            // more code here
+          })();
         
         if (user) {
             res.status(201).json({
@@ -53,9 +73,8 @@ const mailConfig = require('../config/configMail.json');
             res.status(400)
             throw new Error('Invalid user data')
         }
-    });
 
-
+    })
     ////register user with google auth
 
     const signupController = async(req, res) => {
