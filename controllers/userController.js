@@ -17,6 +17,12 @@ const mailConfig = require('../config/configMail.json');
             res.status(400)
             throw new Error('Please enter all fields')
         }
+        else {
+            res.status(401).send("invalid email or password")
+            throw new Error('Invalid email or password')
+        }
+        console.log(user);
+        });
         
         const userExists = await User.findOne({ email })
         
@@ -221,7 +227,9 @@ const sentResetPasswordMail = async(name , email , token) => {
             from : mailConfig.emailUser,
             to : email,
             subject : 'For Reset Password',
-            html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/users/reset-password?token='+token+'">  and reset your password </a>'
+            // html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'
+            html : '<p> Welcome ' + name + ', Go to this  <a href="http://localhost:3000/new-submit">  link  </a> and  enter this number  '+token+' to reset your password'
+
         }
         transporter.sendMail(mailOptions,function(error,info){
             if(error){
@@ -246,10 +254,16 @@ const forgetPassword = async(req , res , next) => {
         const user = await User.findOne({email});
         if(user){
             console.log("hello");
-            const randomstringtoken = randomstring.generate();
-            console.log(randomstringtoken);
-            const data = await User.updateOne({email},{$set:{tokenPass : randomstringtoken}});
-            sentResetPasswordMail(user.name , user.email,randomstringtoken);
+            // const randomstringtoken = randomstring.generate();
+            const _otp = Math.floor(100000 + Math.random() * 900000);
+            // console.log(randomstringtoken);
+            console.log(_otp);
+            // const data = await User.updateOne({email},{$set:{tokenPass : randomstringtoken}});
+            const data = await User.updateOne({email},{$set:{otp : _otp }});
+
+            // sentResetPasswordMail(user.name , user.email,randomstringtoken);
+            sentResetPasswordMail(user.name , user.email,_otp);
+
             res.status(200).send({success:true,msg:"Please check your inbox "});
         }else{
             res.status(400).send("The given mail does not exist");
@@ -264,6 +278,7 @@ const forgetPassword = async(req , res , next) => {
 const resetPassword = async(req, res) => {
     try{
         const token = req.query.token;
+        
         const tokenUser = await User.findOne({tokenPass : token});
         console.log(tokenUser.email);
         if(tokenUser){
@@ -286,7 +301,32 @@ const resetPassword = async(req, res) => {
                 res.status(400).send({success:false, msg:error.message});
     }
 }
-
+const submitotp = async(req, res) => {
+    console.log(req.body)
+    let user = await User.findOne({ otp: req.body.otp });
+    const password= req.body.password;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user = User.updateOne({email : user.email}, {password:hashedPassword , otp:null}).then(result => {
+        res.send({ code: 200, message: 'Password updated' })
+    }).catch(err => {
+        res.send({ code: 500, message: 'Server err' })
+    })
+    
+    
+    // .then(result => {
+    //     //  update the password 
+    //     User.updateOne({ email: result.email }, { password: req.body.password })
+    //         .then(result => {
+    //             res.send({ code: 200, message: 'Password updated' })
+    //         })
+    //         .catch(err => {
+    //             res.send({ code: 500, message: 'Server err' })
+    //         })
+    // }).catch(err => {
+    //     res.send({ code: 500, message: 'otp is wrong' })
+    // })
+}
 
 // block User 
 const blockUser = async(req,res) => {
@@ -332,5 +372,6 @@ module.exports = {
     resetPassword,
     forgetPassword,
     blockUser,
-    unblockUser
+    unblockUser,
+    submitotp
 }
