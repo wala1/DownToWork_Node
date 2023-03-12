@@ -77,7 +77,7 @@ const registerUser = asyncHandler(async (req, res) => {
             throw new Error('Your account is blocked')
         }
         else {
-            res.status(401)
+            res.status(401).send("invalid email or password")
             throw new Error('Invalid email or password')
         }
         console.log(user);
