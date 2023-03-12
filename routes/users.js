@@ -3,10 +3,13 @@ var router = express.Router();
 const { registerUser,LoginUser,GetUser ,forgetPassword,resetPassword , blockUser,unblockUser} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
+const { signinController, signupController } = require("../controllers/userController")
 
 
 router.post('/register',validate,registerUser);
 router.post('/login', LoginUser);
+router.post("/signin", signinController);
+router.post("/signup", signupController);
 router.get('/getuser', protect, GetUser);
 router.post('/forget-password', forgetPassword );
 router.post('/reset-password',resetPassword);
