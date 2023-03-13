@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        // DateOfBirth: user.DateOfBirth,
+        DateOfBirth: user.DateOfBirth,
         //token: generateToken(user._id),
         })
     } else {
@@ -224,6 +224,52 @@ const submitotp = async(req, res) => {
     // })
 }
 
+//             Fetch User By id 
+const findById =  (req , res , next ) => {
+ 
+    const id = req.params.id ;
+      User.findOne({_id :req.params.id })
+    .then((user) => {(user)? res.send(user):res.status(400).send({message :"Not found user with id "+ req.params.id })})
+    .catch((err) =>res.status(500).send({ message: "Error retrieving user with id " + req.params.id  , error : +err}))
+    
+} 
+
+
+
+//            Desactivate account
+const desactivateAccount = async(req,res) => {
+    try{
+       
+        const user = await User.findByIdAndUpdate(req.params.id , {$set:{
+            isActivated  : false
+        }} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ " is blocked" , data: user});
+        
+
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+    
+}
+
+//           Editer account 
+const update = (req, res)=>{
+
+    if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "User with new informations must be provided"})}
+
+    const id = req.params.id;
+
+    //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
+    //The { new: true } option tells Mongoose to return the updated document instead of the original one.
+    User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
+    .then(user => {(!user) ? res.status(404).send({ message : `Cannot Update user with ${id}. Maybe user not found!`}) :res.send(user)})
+    .catch(err => res.status(500).json({ message : "Error Update user information" , error : err}))
+}
+
+
+
+
+
 // block User 
 const blockUser = async(req,res) => {
     try{
@@ -260,6 +306,9 @@ const unblockUser = async(req,res) => {
 
         
 module.exports = {
+    findById,
+    update,
+    desactivateAccount,
     registerUser,
     LoginUser,
     GetUser,
@@ -267,5 +316,5 @@ module.exports = {
     forgetPassword,
     blockUser,
     unblockUser,
-    submitotp
+    submitotp,
 }
