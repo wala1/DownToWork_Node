@@ -7,7 +7,7 @@ const validate = async function (req, res, next) {
             name: yup.string().required(),
             email: yup.string().email().required(),
             password: yup.string().required(),
-            DateOfBirth: yup.date().required(),
+           // DateOfBirth: yup.date().required(),
         });
         
         await registerSchema.validate(req.body);
