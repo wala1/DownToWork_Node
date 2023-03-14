@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword,resetPassword ,submitotp, blockUser,unblockUser, findById, update, desactivateAccount} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword, blockUser,unblockUser, verifyCode,ChangePassword,findById, update, desactivateAccount} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 
@@ -11,11 +11,14 @@ router.get('/getuser', protect, GetUser);
 router.get('/getById/:id', findById );
 router.put('/update/:id', update );
 router.put('/desactivate/:id', desactivateAccount );
-router.post('/forget-password', forgetPassword );
-router.post('/reset-password',resetPassword);
 router.get('/block-user/:id' , blockUser);
 router.get('/unblock-user/:id',unblockUser);
-router.post('/new-password' , submitotp);
+router.post('/forget-password', forgetPassword );
+// router.post('/new-password' , submitotp);
+router.post('/verification-code' , verifyCode);
+router.post('/change-password',ChangePassword);
+
+
 // /* GET users listing. */
 // router.get('/', function(req, res, next) {
 //   res.send('respond with a resource');
