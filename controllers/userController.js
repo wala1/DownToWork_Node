@@ -82,6 +82,8 @@ const mailConfig = require('../config/configMail.json');
             const {googleAccessToken} = req.body;
     
             console.log("req.body.googleAccessToken : "+ req.body.googleAccessToken);
+            console.log("********************************************************* " );
+            console.log("req.body.email : "+ req.body.email);
     
             axios
                 .get("https://www.googleapis.com/oauth2/v3/userinfo", {
@@ -91,8 +93,7 @@ const mailConfig = require('../config/configMail.json');
             })
                 .then(async response => {
                     console.log("here are the response data: "+ response.data.email);
-                    const given_name = response.data.given_name;
-                    const family_name = response.data.family_name;
+                    const name = response.data.given_name;
                     const email = response.data.email;
                     const picture = response.data.picture;
     
@@ -125,8 +126,8 @@ const mailConfig = require('../config/configMail.json');
     ////login user with google auth
 
     const signinController = async(req, res) => {
-        if(req.body.googleAccessToken){
             // gogole-auth
+        if(req.body.googleAccessToken){
             const {googleAccessToken} = req.body;
             console.log("req.body.googleAccessToken : "+ req.body.googleAccessToken);
             
@@ -138,24 +139,26 @@ const mailConfig = require('../config/configMail.json');
             })
                 .then(async response => {
                     console.log("here are the response data: "+ response.data.email);
-                    const firstName = response.data.given_name;
-                    const lastName = response.data.family_name;
+                    const name = response.data.given_name;
                     const email = response.data.email;
                     const picture = response.data.picture;
     
                     const existingUser = await User.findOne({email})
-    
+
                     if (!existingUser) 
                     return res.status(404).json({message: "User don't exist!"})
-    
+                    
                     const token = jwt.sign({
                         email: existingUser.email,
                         id: existingUser._id
-                    }, config.get(process.env.JWT_SECRET), {expiresIn: "1h"})
-            
+                    }, config.get(process.env.JWT_SECRET), {expiresIn: "1h"});
+                    
+                    console.log(token); // log the token
+                    
                     res
                         .status(200)
-                        .json({result: existingUser, token})
+                        .json({result: existingUser, token});
+                    
                         
                 })
                 .catch(err => {
@@ -164,7 +167,7 @@ const mailConfig = require('../config/configMail.json');
                         .status(400)
                         .json({message: "Invalid access token!"})
                 })
-        }
+            }
     }
 
 

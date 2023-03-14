@@ -16,6 +16,15 @@ router.post('/reset-password',resetPassword);
 router.get('/block-user/:id' , blockUser);
 router.get('/unblock-user/:id',unblockUser);
 router.post('/new-password' , submitotp);
+
+// router.post("/api/user", async (req, res) => {
+//     const userData = req.body;
+//     const newUser = new User(userData);
+//     await newUser.save();
+//     res.send("User data saved successfully!");
+//   });
+
+
 // /* GET users listing. */
 // router.get('/', function(req, res, next) {
 //   res.send('respond with a resource');

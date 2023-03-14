@@ -15,6 +15,14 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
     },
+    picture: {
+      type: String,
+      required: [true, 'Please add your picture'],
+    },
+    googleId: {
+      type: String,
+      required: true,
+    },
     DateOfBirth: {
       type: Date,
       format: 'dd-mm-yyyy',
