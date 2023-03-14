@@ -11,9 +11,9 @@ router.post('/login', LoginUser);
 router.post("/signin", signinController);
 router.post("/signup", signupController);
 router.get('/getuser', protect, GetUser);
-// router.get('/getById/:id', findById );
+unt );// router.get('/getById/:id', findById );
 // router.put('/update/:id', update );
-// router.put('/desactivate/:id', desactivateAccount );
+// router.put('/desactivate/:id', desactivateAcco
 router.get('/block-user/:id' , blockUser);
 router.get('/unblock-user/:id',unblockUser);
 router.post('/forget-password', forgetPassword );
