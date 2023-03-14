@@ -17,11 +17,11 @@ const userSchema = mongoose.Schema(
     },
     picture: {
       type: String,
-      required: [true, 'Please add your picture'],
+      required: [false, 'Please add your picture'],
     },
     googleId: {
       type: String,
-      required: true,
+      required: false,
     },
     DateOfBirth: {
       type: Date,

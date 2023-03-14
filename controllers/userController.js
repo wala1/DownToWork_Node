@@ -12,69 +12,42 @@ const mailConfig = require('../config/configMail.json');
 
     const registerUser = asyncHandler(async (req, res) => {
         const { name, email, password } = req.body
-
+    
         if(!name || !email || !password ) {
             res.status(400)
             throw new Error('Please enter all fields')
         }
-        else {
-            res.status(401).send("invalid email or password")
-            throw new Error('Invalid email or password')
-        }
         
-        const userExists = (async () => {
-            // your code here
-            await User.findOne({ email })
-            // more code here
-          })();
-        
-       
+        const userExists = await User.findOne({ email })
         
         if (userExists) {
-            res.status(400)
+            res.status(400).send('user exists')
             throw new Error('User already exists')
         }
-
-        const salt = (async () => {
-            // your code here
-            await bcrypt.genSalt(10)
-            // more code here
-          })();
+    
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
         
-        
-        const hashedPassword = (async () => {
-            // your code here
-            await bcrypt.hash(password, salt)
-            // more code here
-          })();
-        
-        
-        
-        const user =(async () => {
-            // your code here
-            await User.create({
-                name,
-                email,
-                // DateOfBirth,
-                password: hashedPassword,
-            })
-            // more code here
-          })();
+        const user = await User.create({
+            name,
+            email,
+            // DateOfBirth,
+            password: hashedPassword,
+        })
         
         if (user) {
             res.status(201).json({
             _id: user._id,
             name: user.name,
             email: user.email,
-            // DateOfBirth: user.DateOfBirth,
+            DateOfBirth: user.DateOfBirth,
             //token: generateToken(user._id),
             })
         } else {
             res.status(400)
             throw new Error('Invalid user data')
         }
-
-    })
+    });
     ////register user with google auth
 
     const signupController = async(req, res) => {
@@ -178,36 +151,41 @@ const mailConfig = require('../config/configMail.json');
         const LoginUser = asyncHandler(async (req, res) => {
             const { email, password } = req.body;
             console.log(req.body);
-            const user = await User.findOne({ email })
-
-            if (user 
-                && user.isConfirmed 
-                && (!user.isDeleted)
-                &&(!user.isBlocked)
-                &&(await bcrypt.compare(password, user.password))) {
-                const {password, ...userWithoutPassword} = user.toObject();
-                res.json({
-                user: userWithoutPassword,
-                token: generateToken(user._id),
-
-
-                })
-            } else if(user && !user.isConfirmed){
-                res.status(401).send("Please confirm your email")
-                throw new Error('Please confirm your email')
-            }else if(user && user.isDeleted){
-                res.status(401).send("Your account is deleted")
-                throw new Error('Your account is deleted')
-            }else if(user && user.isBlocked){
-                res.status(401).send("Your account is blocked")
-                throw new Error('Your account is blocked')
-            }
-            else {
-                res.status(401)
+            let user = await User.findOne({ email })
+        
+            if (!user) {
+                res.status(401).send("invalid email or password")
                 throw new Error('Invalid email or password')
             }
+        
+            if (!user.isActivated) {
+                user.isActivated = true;
+                await user.save();
+            }
+        
+            if (!user.isConfirmed) {
+                res.status(401).send("Please confirm your email")
+                throw new Error('Please confirm your email')
+            } else if (user.isDeleted) {
+                res.status(401).send("Your account is deleted")
+                throw new Error('Your account is deleted')
+            } else if (user.isBlocked) {
+                res.status(401).send("Your account is blocked")
+                throw new Error('Your account is blocked')
+            } else if (await bcrypt.compare(password, user.password)) {
+                const { password, ...userWithoutPassword } = user.toObject();
+                res.json({
+                    user: userWithoutPassword,
+                    token: generateToken(user._id),
+                })
+            } else {
+                res.status(401).send("invalid email or password")
+                throw new Error('Invalid email or password')
+            }
+        
             console.log(user);
         });
+        
 
         ////generate token
 
