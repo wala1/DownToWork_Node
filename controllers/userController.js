@@ -82,7 +82,7 @@ const mailConfig = require('../config/configMail.json');
             const {googleAccessToken} = req.body;
     
             console.log("req.body.googleAccessToken : "+ req.body.googleAccessToken);
-            console.log("********************************************************* " );
+            console.log("req.body.email : "+ req.body.email);
             console.log("req.body.email : "+ req.body.email);
     
             axios
