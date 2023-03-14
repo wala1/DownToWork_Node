@@ -228,8 +228,7 @@ const mailConfig = require('../config/configMail.json');
 
 
 
-
-
+/*   ############################  PASSWORD RECOVERY ######################################### */
             
 ///send mail
 
@@ -296,7 +295,6 @@ const sentResetPasswordMail = async(name , email , token) => {
 
 }
 
-
 /// forget password 
 
 const forgetPassword = async(req , res , next) => {
@@ -324,33 +322,29 @@ const forgetPassword = async(req , res , next) => {
     }
 }
 
-/// reset password
-        
-const resetPassword = async(req, res) => {
-    try{
-        const token = req.query.token;
-        
-        const tokenUser = await User.findOne({tokenPass : token});
-        console.log(tokenUser.email);
-        if(tokenUser){
-            const password = req.body.password;
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            const userData = await User.findByIdAndUpdate({_id:tokenUser._id} , {$set:{
-                password : hashedPassword, 
-                tokenPass : ''
-            }}, {new:true});
-            res.status(200).send({success:true, msg:" Password has been reset" , data: userData});
 
+/// send code
 
-        }else{
-              res.status(400).send({success:false, msg:"this link has bee expired"});
-                    
-        }
+const verifyCode = async(req, res) => {
+    console.log(req.body)
+    let user = await User.findOne({ otp: req.body.otp });
+    if(!user) return res.send({ code: 400, message: ' code is invalid ' });
+    res.send({ code: 200, message: 'code is valid' , data:user} );
+   
+}
 
-    }catch(error){
-                res.status(400).send({success:false, msg:error.message});
-    }
+/// change pass
+const ChangePassword = async (req,res) => {
+    console.log(req.body);
+    let user = await User.findOne({ otp: req.body.otp });
+    const password= req.body.password;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user = await User.updateOne({email : user.email}, {password:hashedPassword , otp:null}).then(result => {
+                res.send({ code: 200, message: 'Password updated', data:user })
+            }).catch(err => {
+                res.send({ code: 500, message: 'Server err' })
+})
 }
 const submitotp = async(req, res) => {
     console.log(req.body)
@@ -363,22 +357,9 @@ const submitotp = async(req, res) => {
     }).catch(err => {
         res.send({ code: 500, message: 'Server err' })
     })
-    
-    
-    // .then(result => {
-    //     //  update the password 
-    //     User.updateOne({ email: result.email }, { password: req.body.password })
-    //         .then(result => {
-    //             res.send({ code: 200, message: 'Password updated' })
-    //         })
-    //         .catch(err => {
-    //             res.send({ code: 500, message: 'Server err' })
-    //         })
-    // }).catch(err => {
-    //     res.send({ code: 500, message: 'otp is wrong' })
-    // })
+   
 }
-
+/* ################################ ADMIN : BLOCK , UNBLOCK ######################*/
 // block User 
 const blockUser = async(req,res) => {
     try{
@@ -420,9 +401,9 @@ module.exports = {
     signinController,
     signupController,
     GetUser,
-    resetPassword,
     forgetPassword,
     blockUser,
     unblockUser,
-    submitotp
+    verifyCode,
+    ChangePassword
 }
