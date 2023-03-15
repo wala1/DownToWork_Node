@@ -11,15 +11,15 @@ const mailConfig = require('../config/configMail.json');
     ////register user
     
     const registerUser = asyncHandler(async (req, res) => {
-        const { name, email, password } = req.body
+        const { name, email,DateOfBirth, password } = req.body
     
-        if(!name || !email || !password ) {
+        if (!name || !email || !password || !DateOfBirth ) {
             res.status(400)
             throw new Error('Please enter all fields')
         }
-        
+    
         const userExists = await User.findOne({ email })
-        
+    
         if (userExists) {
             res.status(400).send('user exists')
             throw new Error('User already exists')
@@ -27,27 +27,112 @@ const mailConfig = require('../config/configMail.json');
     
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
-        
+        ////confirmationMail////
+        const characters =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let activationCode = "";
+        for (let i = 0; i < 25; i++) {
+            activationCode += characters[Math.floor(Math.random() * characters.length)];
+        }
+    
+    
+    
+        ////confirmationMail////
         const user = await User.create({
             name,
             email,
-            // DateOfBirth,
+            DateOfBirth,
             password: hashedPassword,
+            //jdid
+            activationCode: activationCode,
         })
-        
+    
+    
+    
+    
         if (user) {
             res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            DateOfBirth: user.DateOfBirth,
-            //token: generateToken(user._id),
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                DateOfBirth: user.DateOfBirth,
+                token: generateToken(user._id),
+    
             })
+            sendConfirmationEmail(user.email, user.activationCode);
         } else {
             res.status(400)
             throw new Error('Invalid user data')
         }
     });
+    const sendConfirmationEmail = async (email, activationCode) => {
+        try {
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                requireTLS: true,
+                auth: {
+                    user: mailConfig.emailUser,
+                    pass: mailConfig.emailPassword
+                }
+            });
+            const mailOptions = {
+                from: mailConfig.emailUser,
+                to: email,
+                subject: 'For account confirmation',
+                // html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'
+                html: `
+                <div>
+                <h1>Activation du compte </h1>
+                  
+                  <p>Veuillez confirmer votre email en cliquant sur le lien suivant
+          </p>
+                  <a href=http://localhost:3000/confirm/${activationCode}>Cliquez ici
+          </a>
+          
+                  </div>`
+    
+            }
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log("Mail has been sent", info.response);
+                }
+            });
+    
+        } catch (error) {
+            //res.status(400).send({success:false,msg:error.message});
+        }
+    
+    }
+    
+    const verifyUser = async(req,res)=>{
+    
+        User.findOne({activationCode: req.params.activationCode}, function(err, user) {
+            if (err) {
+              // Handle error
+              console.log("errror")
+            }
+          
+            // Update the field
+            user.isConfirmed = true;
+          
+            // Save the changes
+            user.save(function(err) {
+              if (err) {
+                // Handle error
+                console.log("error2")
+              }
+          
+              // Document updated successfully
+              res.send('Document updated');
+            });
+          });
+    
+        }
+    
     ////register user with google auth
 
     const signupController = async(req, res) => {
@@ -452,5 +537,6 @@ module.exports = {
     submitotp,
     deleteAccount,
     verifyCode,
-    ChangePassword
+    ChangePassword,
+    verifyUser
 }
