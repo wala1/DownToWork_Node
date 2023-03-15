@@ -3,7 +3,7 @@ var router = express.Router();
 const { registerUser,LoginUser,GetUser ,forgetPassword, blockUser,unblockUser, verifyCode,ChangePassword,findById, update, desactivateAccount} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
-const { signinController, signupController } = require("../controllers/userController")
+const { signinController, signupController, deleteAccount } = require("../controllers/userController")
 
 
 router.post('/register',validate,registerUser);
@@ -16,6 +16,7 @@ router.put('/update/:id', update );
 router.put('/desactivate/:id', desactivateAccount );
 router.get('/block-user/:id' , blockUser);
 router.get('/unblock-user/:id',unblockUser);
+router.post('/delete-account', deleteAccount );
 
 // router.post("/api/user", async (req, res) => {
 //     const userData = req.body;

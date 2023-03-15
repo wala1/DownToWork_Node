@@ -9,7 +9,7 @@ const randomstring = require('randomstring');
 const mailConfig = require('../config/configMail.json');
 
     ////register user
-
+    
     const registerUser = asyncHandler(async (req, res) => {
         const { name, email, password } = req.body
 
@@ -268,6 +268,33 @@ const sentResetPasswordMail = async(name , email , token) => {
 }
 
 
+// delete account
+const deleteAccount = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(400).send({ success: false, msg: 'User not found' });
+      }
+  
+      // Check if the password is correct
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res.status(400).send({ success: false, msg: 'Incorrect password' });
+      }
+  
+      // Delete the user's account
+      await User.deleteOne({ _id: user._id });
+  
+      res.status(200).send({ success: true, msg: 'Account deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ success: false, msg: 'Something went wrong' });
+    }
+  };
+  
+  
+
 /// forget password 
 
 const forgetPassword = async(req , res , next) => {
@@ -395,5 +422,6 @@ module.exports = {
     forgetPassword,
     blockUser,
     unblockUser,
-    submitotp
+    submitotp,
+    deleteAccount
 }
