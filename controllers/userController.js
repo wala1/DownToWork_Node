@@ -201,6 +201,47 @@ const mailConfig = require('../config/configMail.json');
 
 
 
+//             Fetch User By id 
+const findById =  (req , res , next ) => {
+ 
+    const id = req.params.id ;
+      User.findOne({_id :req.params.id })
+    .then((user) => {(user)? res.send(user):res.status(400).send({message :"Not found user with id "+ req.params.id })})
+    .catch((err) =>res.status(500).send({ message: "Error retrieving user with id " + req.params.id  , error : +err}))
+    
+} 
+
+
+//            Desactivate account
+const desactivateAccount = async(req,res) => {
+    try{
+       
+        const user = await User.findByIdAndUpdate(req.params.id , {$set:{isActivated  : false}} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ "account is desactivated" , data: user});
+        
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+    
+}
+
+//           Editer account 
+const update = async (req, res)=>{
+
+    if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "User with new informations must be provided"})}
+
+    const id = req.params.id;
+
+    //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
+    //The { new: true } option tells Mongoose to return the updated document instead of the original one.
+    await  User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
+    .then(user => {(!user) ? res.status(404).send({ message : `Cannot Update user with ${id}. Maybe user not found!`}) :res.send(user)})
+    .catch(err => res.status(500).json({ message : "Error Update user information" , error : err}))
+}
+
+
+
+
 /*   ############################  PASSWORD RECOVERY ######################################### */
             
 ///send mail
@@ -369,6 +410,9 @@ const unblockUser = async(req,res) => {
 
         
 module.exports = {
+    findById,
+    desactivateAccount,
+    update,
     registerUser,
     LoginUser,
     signinController,
