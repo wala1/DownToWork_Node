@@ -200,11 +200,6 @@ const mailConfig = require('../config/configMail.json');
             });
 
 
-    //****************** update  *****************/
-    
-
-
-
 
 /*   ############################  PASSWORD RECOVERY ######################################### */
             
