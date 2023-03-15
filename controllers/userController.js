@@ -200,6 +200,7 @@ const mailConfig = require('../config/configMail.json');
             });
 
 
+
 //             Fetch User By id 
 const findById =  (req , res , next ) => {
  
@@ -211,17 +212,13 @@ const findById =  (req , res , next ) => {
 } 
 
 
-
 //            Desactivate account
 const desactivateAccount = async(req,res) => {
     try{
        
-        const user = await User.findByIdAndUpdate(req.params.id , {$set:{
-            isActivated  : false
-        }} , {new : true});
-        res.status(200).send({success:true, msg:" The user " + user.name+ " is blocked" , data: user});
+        const user = await User.findByIdAndUpdate(req.params.id , {$set:{isActivated  : false}} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ "account is desactivated" , data: user});
         
-
     }catch(error){
         res.status(400).send({success:false, msg:error.message});
     }
@@ -242,7 +239,7 @@ const update = async (req, res)=>{
     .catch(err => res.status(500).json({ message : "Error Update user information" , error : err}))
 }
 
-    
+
 
 
 /*   ############################  PASSWORD RECOVERY ######################################### */
