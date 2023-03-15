@@ -12,69 +12,42 @@ const mailConfig = require('../config/configMail.json');
     
     const registerUser = asyncHandler(async (req, res) => {
         const { name, email, password } = req.body
-
+    
         if(!name || !email || !password ) {
             res.status(400)
             throw new Error('Please enter all fields')
         }
-        else {
-            res.status(401).send("invalid email or password")
-            throw new Error('Invalid email or password')
-        }
         
-        const userExists = (async () => {
-            // your code here
-            await User.findOne({ email })
-            // more code here
-          })();
-        
-       
+        const userExists = await User.findOne({ email })
         
         if (userExists) {
-            res.status(400)
+            res.status(400).send('user exists')
             throw new Error('User already exists')
         }
-
-        const salt = (async () => {
-            // your code here
-            await bcrypt.genSalt(10)
-            // more code here
-          })();
+    
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
         
-        
-        const hashedPassword = (async () => {
-            // your code here
-            await bcrypt.hash(password, salt)
-            // more code here
-          })();
-        
-        
-        
-        const user =(async () => {
-            // your code here
-            await User.create({
-                name,
-                email,
-                // DateOfBirth,
-                password: hashedPassword,
-            })
-            // more code here
-          })();
+        const user = await User.create({
+            name,
+            email,
+            // DateOfBirth,
+            password: hashedPassword,
+        })
         
         if (user) {
             res.status(201).json({
             _id: user._id,
             name: user.name,
             email: user.email,
-            // DateOfBirth: user.DateOfBirth,
+            DateOfBirth: user.DateOfBirth,
             //token: generateToken(user._id),
             })
         } else {
             res.status(400)
             throw new Error('Invalid user data')
         }
-
-    })
+    });
     ////register user with google auth
 
     const signupController = async(req, res) => {
@@ -178,36 +151,41 @@ const mailConfig = require('../config/configMail.json');
         const LoginUser = asyncHandler(async (req, res) => {
             const { email, password } = req.body;
             console.log(req.body);
-            const user = await User.findOne({ email })
-
-            if (user 
-                && user.isConfirmed 
-                && (!user.isDeleted)
-                &&(!user.isBlocked)
-                &&(await bcrypt.compare(password, user.password))) {
-                const {password, ...userWithoutPassword} = user.toObject();
-                res.json({
-                user: userWithoutPassword,
-                token: generateToken(user._id),
-
-
-                })
-            } else if(user && !user.isConfirmed){
-                res.status(401).send("Please confirm your email")
-                throw new Error('Please confirm your email')
-            }else if(user && user.isDeleted){
-                res.status(401).send("Your account is deleted")
-                throw new Error('Your account is deleted')
-            }else if(user && user.isBlocked){
-                res.status(401).send("Your account is blocked")
-                throw new Error('Your account is blocked')
-            }
-            else {
-                res.status(401)
+            let user = await User.findOne({ email })
+        
+            if (!user) {
+                res.status(401).send("invalid email or password")
                 throw new Error('Invalid email or password')
             }
+        
+            if (!user.isActivated) {
+                user.isActivated = true;
+                await user.save();
+            }
+        
+            if (!user.isConfirmed) {
+                res.status(401).send("Please confirm your email")
+                throw new Error('Please confirm your email')
+            } else if (user.isDeleted) {
+                res.status(401).send("Your account is deleted")
+                throw new Error('Your account is deleted')
+            } else if (user.isBlocked) {
+                res.status(401).send("Your account is blocked")
+                throw new Error('Your account is blocked')
+            } else if (await bcrypt.compare(password, user.password)) {
+                const { password, ...userWithoutPassword } = user.toObject();
+                res.json({
+                    user: userWithoutPassword,
+                    token: generateToken(user._id),
+                })
+            } else {
+                res.status(401).send("invalid email or password")
+                throw new Error('Invalid email or password')
+            }
+        
             console.log(user);
         });
+        
 
         ////generate token
 
@@ -222,14 +200,52 @@ const mailConfig = require('../config/configMail.json');
             });
 
 
-    //****************** update  *****************/
+//             Fetch User By id 
+const findById =  (req , res , next ) => {
+ 
+    const id = req.params.id ;
+      User.findOne({_id :req.params.id })
+    .then((user) => {(user)? res.send(user):res.status(400).send({message :"Not found user with id "+ req.params.id })})
+    .catch((err) =>res.status(500).send({ message: "Error retrieving user with id " + req.params.id  , error : +err}))
+    
+} 
+
+
+
+//            Desactivate account
+const desactivateAccount = async(req,res) => {
+    try{
+       
+        const user = await User.findByIdAndUpdate(req.params.id , {$set:{
+            isActivated  : false
+        }} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ " is blocked" , data: user});
+        
+
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+    
+}
+
+//           Editer account 
+const update = async (req, res)=>{
+
+    if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "User with new informations must be provided"})}
+
+    const id = req.params.id;
+
+    //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
+    //The { new: true } option tells Mongoose to return the updated document instead of the original one.
+    await  User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
+    .then(user => {(!user) ? res.status(404).send({ message : `Cannot Update user with ${id}. Maybe user not found!`}) :res.send(user)})
+    .catch(err => res.status(500).json({ message : "Error Update user information" , error : err}))
+}
+
     
 
 
-
-
-
-
+/*   ############################  PASSWORD RECOVERY ######################################### */
             
 ///send mail
 
@@ -250,7 +266,36 @@ const sentResetPasswordMail = async(name , email , token) => {
             to : email,
             subject : 'For Reset Password',
             // html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'
-            html : '<p> Welcome ' + name + ', Go to this  <a href="http://localhost:3000/new-submit">  link  </a> and  enter this number  '+token+' to reset your password'
+            html :  `<!DOCTYPE html>
+            <html lang="en" >
+            <head>
+              <meta charset="UTF-8">
+              <title>CodePen - OTP Email Template</title>
+              
+            </head>
+            <body>
+            <!-- partial:index.partial.html -->
+            <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+              <div style="margin:50px auto;width:70%;padding:20px 0">
+                <div style="border-bottom:1px solid #eee">
+                  <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Down To Work </a>
+                </div>
+                <p style="font-size:1.1em">Hi,</p>
+                <p>Thank you for choosing Down To Work. Use the following CODE to complete your Password Recovery Procedure. </p>
+                <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${token}</h2>
+                <p style="font-size:0.9em;">Regards,<br />DTW</p>
+                <hr style="border:none;border-top:1px solid #eee" />
+                <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+                  <p>Down To Work</p>
+                  <p>Tunisia , </p>
+                  <p>TN</p>
+                </div>
+              </div>
+            </div>
+            <!-- partial -->
+              
+            </body>
+            </html>`
 
         }
         transporter.sendMail(mailOptions,function(error,info){
@@ -304,7 +349,7 @@ const forgetPassword = async(req , res , next) => {
         if(user){
             console.log("hello");
             // const randomstringtoken = randomstring.generate();
-            const _otp = Math.floor(100000 + Math.random() * 900000);
+            const _otp = Math.floor(1000 + Math.random() * 9000);
             // console.log(randomstringtoken);
             console.log(_otp);
             // const data = await User.updateOne({email},{$set:{tokenPass : randomstringtoken}});
@@ -322,33 +367,29 @@ const forgetPassword = async(req , res , next) => {
     }
 }
 
-/// reset password
-        
-const resetPassword = async(req, res) => {
-    try{
-        const token = req.query.token;
-        
-        const tokenUser = await User.findOne({tokenPass : token});
-        console.log(tokenUser.email);
-        if(tokenUser){
-            const password = req.body.password;
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            const userData = await User.findByIdAndUpdate({_id:tokenUser._id} , {$set:{
-                password : hashedPassword, 
-                tokenPass : ''
-            }}, {new:true});
-            res.status(200).send({success:true, msg:" Password has been reset" , data: userData});
 
+/// send code
 
-        }else{
-              res.status(400).send({success:false, msg:"this link has bee expired"});
-                    
-        }
+const verifyCode = async(req, res) => {
+    console.log(req.body)
+    let user = await User.findOne({ otp: req.body.otp });
+    if(!user) return res.send({ code: 400, message: ' code is invalid ' });
+    res.send({ code: 200, message: 'code is valid' , data:user} );
+   
+}
 
-    }catch(error){
-                res.status(400).send({success:false, msg:error.message});
-    }
+/// change pass
+const ChangePassword = async (req,res) => {
+    console.log(req.body);
+    let user = await User.findOne({ otp: req.body.otp });
+    const password= req.body.password;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user = await User.updateOne({email : user.email}, {password:hashedPassword , otp:null}).then(result => {
+                res.send({ code: 200, message: 'Password updated', data:user })
+            }).catch(err => {
+                res.send({ code: 500, message: 'Server err' })
+})
 }
 const submitotp = async(req, res) => {
     console.log(req.body)
@@ -361,22 +402,9 @@ const submitotp = async(req, res) => {
     }).catch(err => {
         res.send({ code: 500, message: 'Server err' })
     })
-    
-    
-    // .then(result => {
-    //     //  update the password 
-    //     User.updateOne({ email: result.email }, { password: req.body.password })
-    //         .then(result => {
-    //             res.send({ code: 200, message: 'Password updated' })
-    //         })
-    //         .catch(err => {
-    //             res.send({ code: 500, message: 'Server err' })
-    //         })
-    // }).catch(err => {
-    //     res.send({ code: 500, message: 'otp is wrong' })
-    // })
+   
 }
-
+/* ################################ ADMIN : BLOCK , UNBLOCK ######################*/
 // block User 
 const blockUser = async(req,res) => {
     try{
@@ -413,15 +441,19 @@ const unblockUser = async(req,res) => {
 
         
 module.exports = {
+    findById,
+    desactivateAccount,
+    update,
     registerUser,
     LoginUser,
     signinController,
     signupController,
     GetUser,
-    resetPassword,
     forgetPassword,
     blockUser,
     unblockUser,
     submitotp,
-    deleteAccount
+    deleteAccount,
+    verifyCode,
+    ChangePassword
 }
