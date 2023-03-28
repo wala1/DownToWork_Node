@@ -14,6 +14,8 @@ const usersRouter = require('./routes/users');
 const postRouter = require('./routes/post');
 const topicsRouter = require('./routes/topic');
 const courseRouter = require('./routes/course');
+const ordersRouter = require('./routes/orders');
+const stripeRouter = require('./routes/stripe');
 const cors = require('cors');
 
 const app = express();
@@ -48,8 +50,9 @@ app.use('/', indexRouter);
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
-
+app.use('/orders' , ordersRouter);
 app.use('/courses' , courseRouter);
+app.use('/checkout' , stripeRouter);
 
 //creation du serveur
 const server = http.createServer(app); 
