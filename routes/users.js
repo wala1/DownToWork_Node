@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword, blockUser,unblockUser, verifyCode,ChangePassword, findById, update, desactivateAccount,verifyUser} = require('../controllers/userController.js');
-const { protect } = require ('../middleWares/authMiddleWare.js');
-const { validate } = require('../middleWares/validation.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword , blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser} = require('../controllers/userController.js');const { validate } = require('../middleWares/validation.js');
 const { signinController, signupController } = require("../controllers/userController")
 
 
