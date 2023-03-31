@@ -25,8 +25,8 @@ const userSchema = mongoose.Schema(
     },
     DateOfBirth: {
       type: Date,
-      format: 'dd-mm-yyyy',
-      // required: [true, 'Please add a DateOfBirth'],
+      format: 'yyyy-MM-dd',
+     // required: [true, 'Please add a DateOfBirth'],
     },
     isOwner : {
       type : Boolean,
@@ -48,6 +48,7 @@ const userSchema = mongoose.Schema(
       type : Boolean,
       default: false,
     },
+   activationCode: String,
     isDeleted : {
       type : Boolean,
       default: false,
