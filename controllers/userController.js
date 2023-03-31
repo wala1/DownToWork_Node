@@ -9,17 +9,17 @@ const randomstring = require('randomstring');
 const mailConfig = require('../config/configMail.json');
 
     ////register user
-
-    const registerUser = asyncHandler(async (req, res) => {
-        const { name, email, password } = req.body
     
-        if(!name || !email || !password ) {
+    const registerUser = asyncHandler(async (req, res) => {
+        const { name, email,DateOfBirth, password } = req.body
+    
+        if (!name || !email || !password || !DateOfBirth ) {
             res.status(400)
             throw new Error('Please enter all fields')
         }
-        
+    
         const userExists = await User.findOne({ email })
-        
+    
         if (userExists) {
             res.status(400).send('user exists')
             throw new Error('User already exists')
@@ -27,27 +27,112 @@ const mailConfig = require('../config/configMail.json');
     
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
-        
+        ////confirmationMail////
+        const characters =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let activationCode = "";
+        for (let i = 0; i < 25; i++) {
+            activationCode += characters[Math.floor(Math.random() * characters.length)];
+        }
+    
+    
+    
+        ////confirmationMail////
         const user = await User.create({
             name,
             email,
-            // DateOfBirth,
+            DateOfBirth,
             password: hashedPassword,
+            //jdid
+            activationCode: activationCode,
         })
-        
+    
+    
+    
+    
         if (user) {
             res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            DateOfBirth: user.DateOfBirth,
-            //token: generateToken(user._id),
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                DateOfBirth: user.DateOfBirth,
+                token: generateToken(user._id),
+    
             })
+            sendConfirmationEmail(user.email, user.activationCode);
         } else {
             res.status(400)
             throw new Error('Invalid user data')
         }
     });
+    const sendConfirmationEmail = async (email, activationCode) => {
+        try {
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                requireTLS: true,
+                auth: {
+                    user: mailConfig.emailUser,
+                    pass: mailConfig.emailPassword
+                }
+            });
+            const mailOptions = {
+                from: mailConfig.emailUser,
+                to: email,
+                subject: 'For account confirmation',
+                // html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'
+                html: `
+                <div>
+                <h1>Activation du compte </h1>
+                  
+                  <p>Veuillez confirmer votre email en cliquant sur le lien suivant
+          </p>
+                  <a href=http://localhost:3000/confirm/${activationCode}>Cliquez ici
+          </a>
+          
+                  </div>`
+    
+            }
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log("Mail has been sent", info.response);
+                }
+            });
+    
+        } catch (error) {
+            //res.status(400).send({success:false,msg:error.message});
+        }
+    
+    }
+    
+    const verifyUser = async(req,res)=>{
+    
+        User.findOne({activationCode: req.params.activationCode}, function(err, user) {
+            if (err) {
+              // Handle error
+              console.log("errror")
+            }
+          
+            // Update the field
+            user.isConfirmed = true;
+          
+            // Save the changes
+            user.save(function(err) {
+              if (err) {
+                // Handle error
+                console.log("error2")
+              }
+          
+              // Document updated successfully
+              res.send('Document updated');
+            });
+          });
+    
+        }
+    
     ////register user with google auth
 
     const signupController = async(req, res) => {
@@ -275,17 +360,17 @@ const sentResetPasswordMail = async(name , email , token) => {
             <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
               <div style="margin:50px auto;width:70%;padding:20px 0">
                 <div style="border-bottom:1px solid #eee">
-                  <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Koding 101</a>
+                  <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Down To Work </a>
                 </div>
                 <p style="font-size:1.1em">Hi,</p>
-                <p>Thank you for choosing Koding 101. Use the following OTP to complete your Password Recovery Procedure. OTP is valid for 5 minutes</p>
+                <p>Thank you for choosing Down To Work. Use the following CODE to complete your Password Recovery Procedure. </p>
                 <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${token}</h2>
-                <p style="font-size:0.9em;">Regards,<br />Koding 101</p>
+                <p style="font-size:0.9em;">Regards,<br />DTW</p>
                 <hr style="border:none;border-top:1px solid #eee" />
                 <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
-                  <p>Koding 101 Inc</p>
-                  <p>1600 Amphitheatre Parkway</p>
-                  <p>California</p>
+                  <p>Down To Work</p>
+                  <p>Tunisia , </p>
+                  <p>TN</p>
                 </div>
               </div>
             </div>
@@ -308,6 +393,34 @@ const sentResetPasswordMail = async(name , email , token) => {
     }
 
 }
+
+
+// delete account
+const deleteAccount = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(400).send({ success: false, msg: 'User not found' });
+      }
+  
+      // Check if the password is correct
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res.status(400).send({ success: false, msg: 'Incorrect password' });
+      }
+  
+      // Delete the user's account
+      await User.deleteOne({ _id: user._id });
+  
+      res.status(200).send({ success: true, msg: 'Account deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ success: false, msg: 'Something went wrong' });
+    }
+  };
+  
+  
 
 /// forget password 
 
@@ -421,6 +534,9 @@ module.exports = {
     forgetPassword,
     blockUser,
     unblockUser,
+    submitotp,
+    deleteAccount,
     verifyCode,
-    ChangePassword
+    ChangePassword,
+    verifyUser
 }

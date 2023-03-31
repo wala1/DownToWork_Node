@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword, blockUser,unblockUser, verifyCode,ChangePassword, findById, update, desactivateAccount} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword, blockUser,unblockUser, verifyCode,ChangePassword, findById, update, desactivateAccount,verifyUser} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 const { signinController, signupController } = require("../controllers/userController")
@@ -19,6 +19,7 @@ router.get('/unblock-user/:id',unblockUser);
 router.post('/forget-password', forgetPassword );
 router.post('/verification-code' , verifyCode);
 router.post('/change-password',ChangePassword);
+router.post('/verifyUser/:activationCode',verifyUser);
 
 
 // /* GET users listing. */
