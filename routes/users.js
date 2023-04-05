@@ -1,12 +1,13 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword, blockUser,unblockUser, verifyCode,ChangePassword, findById, update, desactivateAccount} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword , blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 const { signinController, signupController, deleteAccount } = require("../controllers/userController")
 
 
 router.post('/register',validate,registerUser);
+router.post('/verifyUser/:activationCode',verifyUser);
 router.post('/login', LoginUser);
 router.post("/signin", signinController);
 router.post("/signup", signupController);
