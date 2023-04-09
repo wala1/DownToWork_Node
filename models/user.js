@@ -15,10 +15,18 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
     },
+    picture: {
+      type: String,
+      required: [false, 'Please add your picture'],
+    },
+    googleId: {
+      type: String,
+      required: false,
+    },
     DateOfBirth: {
       type: Date,
-      format: 'dd-mm-yyyy',
-      // required: [true, 'Please add a DateOfBirth'],
+      format: 'yyyy-MM-dd',
+     // required: [true, 'Please add a DateOfBirth'],
     },
     isOwner : {
       type : Boolean,
@@ -40,6 +48,7 @@ const userSchema = mongoose.Schema(
       type : Boolean,
       default: false,
     },
+   activationCode: String,
     isDeleted : {
       type : Boolean,
       default: false,

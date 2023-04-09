@@ -11,9 +11,13 @@ const logger = require('morgan');
 const mongodbConnection = require('./config/mongoconnection.json');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const testRouter = require('./routes/test');
+const quizRouter = require('./routes/quiz');
 const postRouter = require('./routes/post');
 const topicsRouter = require('./routes/topic');
 const courseRouter = require('./routes/course');
+const ordersRouter = require('./routes/orders');
+const stripeRouter = require('./routes/stripe');
 const cors = require('cors');
 
 const app = express();
@@ -45,17 +49,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 app.use('/', indexRouter);
+app.use('/test', testRouter);
+app.use('/quiz', quizRouter);
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
-
+app.use('/orders' , ordersRouter);
 app.use('/courses' , courseRouter);
+app.use('/checkout' , stripeRouter);
 
 //creation du serveur
 const server = http.createServer(app); 
 server.listen(3001,()=>console.log("server is run")); //port
-
-
-
 
 module.exports = app;

@@ -1,88 +1,277 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const axios = require("axios");
+const config = require("config");
 const asyncHandler = require('express-async-handler');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
 const mailConfig = require('../config/configMail.json');
 
-////register user
-
-const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body
-
-    if(!name || !email || !password ) {
-        res.status(400)
-        throw new Error('Please enter all fields')
-    }
+    ////register user
     
-    const userExists = await User.findOne({ email })
+    const registerUser = asyncHandler(async (req, res) => {
+        const { name, email,DateOfBirth, password } = req.body
     
-    if (userExists) {
-        res.status(400).send('user exists')
-        throw new Error('User already exists')
-    }
-
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
+        if (!name || !email || !password || !DateOfBirth ) {
+            res.status(400)
+            throw new Error('Please enter all fields')
+        }
     
-    const user = await User.create({
-        name,
-        email,
-        // DateOfBirth,
-        password: hashedPassword,
-    })
+        const userExists = await User.findOne({ email })
     
-    if (user) {
-        res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        DateOfBirth: user.DateOfBirth,
-        //token: generateToken(user._id),
+        if (userExists) {
+            res.status(400).send('user exists')
+            throw new Error('User already exists')
+        }
+    
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        ////confirmationMail////
+        const characters =
+            "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let activationCode = "";
+        for (let i = 0; i < 25; i++) {
+            activationCode += characters[Math.floor(Math.random() * characters.length)];
+        }
+    
+    
+    
+        ////confirmationMail////
+        const user = await User.create({
+            name,
+            email,
+            DateOfBirth,
+            password: hashedPassword,
+            //jdid
+            activationCode: activationCode,
         })
-    } else {
-        res.status(400)
-        throw new Error('Invalid user data')
-    }
-});
-
-    ////login user
-
-    const LoginUser = asyncHandler(async (req, res) => {
-        const { email, password } = req.body;
-        console.log(req.body);
-        const user = await User.findOne({ email })
-
-        if (user 
-            && user.isConfirmed 
-            && (!user.isDeleted)
-            &&(!user.isBlocked)
-            &&(await bcrypt.compare(password, user.password))) {
-            const {password, ...userWithoutPassword} = user.toObject();
-            res.json({
-            user: userWithoutPassword,
-            token: generateToken(user._id),
-
-
+    
+    
+    
+    
+        if (user) {
+            res.status(201).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                DateOfBirth: user.DateOfBirth,
+                token: generateToken(user._id),
+    
             })
-        } else if(user && !user.isConfirmed){
-            res.status(401).send("Please confirm your email")
-            throw new Error('Please confirm your email')
-        }else if(user && user.isDeleted){
-            res.status(401).send("Your account is deleted")
-            throw new Error('Your account is deleted')
-        }else if(user && user.isBlocked){
-            res.status(401).send("Your account is blocked")
-            throw new Error('Your account is blocked')
+            sendConfirmationEmail(user.email, user.activationCode);
+        } else {
+            res.status(400)
+            throw new Error('Invalid user data')
         }
-        else {
-            res.status(401).send("invalid email or password")
-            throw new Error('Invalid email or password')
+    });
+    const sendConfirmationEmail = async (email, activationCode) => {
+        try {
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                requireTLS: true,
+                auth: {
+                    user: mailConfig.emailUser,
+                    pass: mailConfig.emailPassword
+                }
+            });
+            const mailOptions = {
+                from: mailConfig.emailUser,
+                to: email,
+                subject: 'For account confirmation',
+                // html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'
+                html: `
+                <div>
+                <h1>Activation du compte </h1>
+                  
+                  <p>Veuillez confirmer votre email en cliquant sur le lien suivant
+          </p>
+                  <a href=http://localhost:3000/confirm/${activationCode}>Cliquez ici
+          </a>
+          
+                  </div>`
+    
+            }
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log("Mail has been sent", info.response);
+                }
+            });
+    
+        } catch (error) {
+            //res.status(400).send({success:false,msg:error.message});
         }
-        console.log(user);
+    
+    }
+    
+    const verifyUser = async(req,res)=>{
+    
+        User.findOne({activationCode: req.params.activationCode}, function(err, user) {
+            if (err) {
+              // Handle error
+              console.log("errror")
+            }
+          
+            // Update the field
+            user.isConfirmed = true;
+          
+            // Save the changes
+            user.save(function(err) {
+              if (err) {
+                // Handle error
+                console.log("error2")
+              }
+          
+              // Document updated successfully
+              res.send('Document updated');
+            });
+          });
+    
+        }
+    
+    ////register user with google auth
+
+    const signupController = async(req, res) => {
+        if (req.body.googleAccessToken) {
+            const {googleAccessToken} = req.body;
+    
+            console.log("req.body.googleAccessToken : "+ req.body.googleAccessToken);
+            console.log("req.body.email : "+ req.body.email);
+            console.log("req.body.email : "+ req.body.email);
+    
+            axios
+                .get("https://www.googleapis.com/oauth2/v3/userinfo", {
+                headers: {
+                    "Authorization": `Bearer ${googleAccessToken}`
+                }
+            })
+                .then(async response => {
+                    console.log("here are the response data: "+ response.data.email);
+                    const name = response.data.given_name;
+                    const email = response.data.email;
+                    const picture = response.data.picture;
+    
+                    const existingUser = await User.findOne({email})
+    
+                    if (existingUser){ 
+                        return res.status(400).json({message: "User already exist!"});
+                    }
+    
+                    const result = await User.create({verified:"true",email, firstName, lastName, profilePicture: picture})
+    
+                    const token = jwt.sign({
+                        email: result.email,
+                        id: result._id
+                    }, config.get(process.env.JWT_SECRET), {expiresIn: "1h"})
+    
+                    res
+                        .status(200)
+                        .json({result, token})
+                })
+                .catch(err => {
+                    res
+                        .status(400)
+                        .json({message: "Invalid access token!"})
+                })
+    
+        }
+    }
+
+    ////login user with google auth
+
+    const signinController = async(req, res) => {
+            // gogole-auth
+        if(req.body.googleAccessToken){
+            const {googleAccessToken} = req.body;
+            console.log("req.body.googleAccessToken : "+ req.body.googleAccessToken);
+            
+            axios
+                .get("https://www.googleapis.com/oauth2/v3/userinfo", {
+                headers: {
+                    "Authorization": `Bearer ${googleAccessToken}`
+                }
+            })
+                .then(async response => {
+                    console.log("here are the response data: "+ response.data.email);
+                    const name = response.data.given_name;
+                    const email = response.data.email;
+                    const picture = response.data.picture;
+    
+                    const existingUser = await User.findOne({email})
+
+                    if (!existingUser) 
+                    return res.status(404).json({message: "User don't exist!"})
+                    
+                    const token = jwt.sign({
+                        email: existingUser.email,
+                        id: existingUser._id
+                    }, config.get(process.env.JWT_SECRET), {expiresIn: "1h"});
+                    
+                    console.log(token); // log the token
+                    
+                    res
+                        .status(200)
+                        .json({result: existingUser, token});
+                    
+                        
+                })
+                .catch(err => {
+                    console.error(err);
+                    res
+                        .status(400)
+                        .json({message: "Invalid access token!"})
+                })
+            }
+    }
+
+
+
+
+        //normal-auth
+
+        const LoginUser = asyncHandler(async (req, res) => {
+            const { email, password } = req.body;
+            console.log(req.body);
+            let user = await User.findOne({ email })
+        
+            if (!user) {
+                res.status(401).send("invalid email or password")
+                throw new Error('Invalid email or password')
+            }
+        
+            if (!user.isActivated) {
+                user.isActivated = true;
+                await user.save();
+            }
+        
+            if (!user.isConfirmed) {
+                res.status(401).send("Please confirm your email")
+                throw new Error('Please confirm your email')
+            } else if (user.isDeleted) {
+                res.status(401).send("Your account is deleted")
+                throw new Error('Your account is deleted')
+            } else if (user.isBlocked) {
+                res.status(401).send("Your account is blocked")
+                throw new Error('Your account is blocked')
+            } else if (await bcrypt.compare(password, user.password)) {
+                const { password, ...userWithoutPassword } = user.toObject();
+                res.json({
+                    user: userWithoutPassword,
+                    token: generateToken(user._id),
+                })
+            } else {
+                res.status(401).send("invalid email or password")
+                throw new Error('Invalid email or password')
+            }
+        
+            console.log(user);
         });
         
+
         ////generate token
 
         const generateToken = (id) => {
@@ -96,14 +285,49 @@ const registerUser = asyncHandler(async (req, res) => {
             });
 
 
-    //****************** update  *****************/
+
+//             Fetch User By id 
+const findById =  (req , res , next ) => {
+ 
+    const id = req.params.id ;
+      User.findOne({_id :req.params.id })
+    .then((user) => {(user)? res.send(user):res.status(400).send({message :"Not found user with id "+ req.params.id })})
+    .catch((err) =>res.status(500).send({ message: "Error retrieving user with id " + req.params.id  , error : +err}))
     
+} 
+
+
+//            Desactivate account
+const desactivateAccount = async(req,res) => {
+    try{
+       
+        const user = await User.findByIdAndUpdate(req.params.id , {$set:{isActivated  : false}} , {new : true});
+        res.status(200).send({success:true, msg:" The user " + user.name+ "account is desactivated" , data: user});
+        
+    }catch(error){
+        res.status(400).send({success:false, msg:error.message});
+    }
+    
+}
+
+//           Editer account 
+const update = async (req, res)=>{
+
+    if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "User with new informations must be provided"})}
+
+    const id = req.params.id;
+
+    //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
+    //The { new: true } option tells Mongoose to return the updated document instead of the original one.
+    await  User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
+    .then(user => {(!user) ? res.status(404).send({ message : `Cannot Update user with ${id}. Maybe user not found!`}) :res.send(user)})
+    .catch(err => res.status(500).json({ message : "Error Update user information" , error : err}))
+}
 
 
 
 
-
-
+/*   ############################  PASSWORD RECOVERY ######################################### */
             
 ///send mail
 
@@ -171,6 +395,33 @@ const sentResetPasswordMail = async(name , email , token) => {
 }
 
 
+// delete account
+const deleteAccount = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(400).send({ success: false, msg: 'User not found' });
+      }
+  
+      // Check if the password is correct
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res.status(400).send({ success: false, msg: 'Incorrect password' });
+      }
+  
+      // Delete the user's account
+      await User.deleteOne({ _id: user._id });
+  
+      res.status(200).send({ success: true, msg: 'Account deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ success: false, msg: 'Something went wrong' });
+    }
+  };
+  
+  
+
 /// forget password 
 
 const forgetPassword = async(req , res , next) => {
@@ -188,9 +439,8 @@ const forgetPassword = async(req , res , next) => {
 
             // sentResetPasswordMail(user.name , user.email,randomstringtoken);
             sentResetPasswordMail(user.name , user.email,_otp);
-            res.send({ code: 200, message: 'Please check your inbox ok ' })
 
-            // res.status(200).send({success:true,msg:"Please check your inbox "});
+            res.status(200).send({success:true,msg:"Please check your inbox "});
         }else{
             res.status(400).send("The given mail does not exist");
         }
@@ -198,7 +448,9 @@ const forgetPassword = async(req , res , next) => {
         res.status(400).send({success:false, msg:error.message});
     }
 }
-/* send CODE */
+
+
+/// send code
 
 const verifyCode = async(req, res) => {
     console.log(req.body)
@@ -207,6 +459,8 @@ const verifyCode = async(req, res) => {
     res.send({ code: 200, message: 'code is valid' , data:user} );
    
 }
+
+/// change pass
 const ChangePassword = async (req,res) => {
     console.log(req.body);
     let user = await User.findOne({ otp: req.body.otp });
@@ -219,65 +473,20 @@ const ChangePassword = async (req,res) => {
                 res.send({ code: 500, message: 'Server err' })
 })
 }
-// const submitotp = async(req, res) => {
-//     console.log(req.body)
-//     let user = await User.findOne({ otp: req.body.otp });
-//     const password= req.body.password;
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-//     user = User.updateOne({email : user.email}, {password:hashedPassword , otp:null}).then(result => {
-//         res.send({ code: 200, message: 'Password updated' })
-//     }).catch(err => {
-//         res.send({ code: 500, message: 'Server err' })
-//     })
-// }
-
-//             Fetch User By id 
-const findById =  (req , res , next ) => {
- 
-    const id = req.params.id ;
-      User.findOne({_id :req.params.id })
-    .then((user) => {(user)? res.send(user):res.status(400).send({message :"Not found user with id "+ req.params.id })})
-    .catch((err) =>res.status(500).send({ message: "Error retrieving user with id " + req.params.id  , error : +err}))
-    
-} 
-
-
-
-//            Desactivate account
-const desactivateAccount = async(req,res) => {
-    try{
-       
-        const user = await User.findByIdAndUpdate(req.params.id , {$set:{
-            isActivated  : false
-        }} , {new : true});
-        res.status(200).send({success:true, msg:" The user " + user.name+ " is blocked" , data: user});
-        
-
-    }catch(error){
-        res.status(400).send({success:false, msg:error.message});
-    }
-    
+const submitotp = async(req, res) => {
+    console.log(req.body)
+    let user = await User.findOne({ otp: req.body.otp });
+    const password= req.body.password;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user = User.updateOne({email : user.email}, {password:hashedPassword , otp:null}).then(result => {
+        res.send({ code: 200, message: 'Password updated' })
+    }).catch(err => {
+        res.send({ code: 500, message: 'Server err' })
+    })
+   
 }
-
-//           Editer account 
-const update = (req, res)=>{
-
-    if(Object.keys(req.body).length === 0){ return res.status(400).send({ message : "User with new informations must be provided"})}
-
-    const id = req.params.id;
-
-    //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
-    //The { new: true } option tells Mongoose to return the updated document instead of the original one.
-    User.findByIdAndUpdate(id,req.body, { useFindAndModify: false , new: true})
-    .then(user => {(!user) ? res.status(404).send({ message : `Cannot Update user with ${id}. Maybe user not found!`}) :res.send(user)})
-    .catch(err => res.status(500).json({ message : "Error Update user information" , error : err}))
-}
-
-
-
-
-
+/* ################################ ADMIN : BLOCK , UNBLOCK ######################*/
 // block User 
 const blockUser = async(req,res) => {
     try{
@@ -310,18 +519,24 @@ const unblockUser = async(req,res) => {
 
 
 
+
+
         
 module.exports = {
     findById,
-    update,
     desactivateAccount,
+    update,
     registerUser,
     LoginUser,
+    signinController,
+    signupController,
     GetUser,
     forgetPassword,
     blockUser,
     unblockUser,
-    // submitotp
+    submitotp,
+    deleteAccount,
     verifyCode,
-    ChangePassword
+    ChangePassword,
+    verifyUser
 }
