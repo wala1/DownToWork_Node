@@ -47,6 +47,9 @@ const questionSchema = mongoose.Schema({
   choices: {
     type: [choiceSchema],
     required: true
+  },
+  idQuiz: { 
+    type: mongoose.Schema.Types.String, ref: "Quiz" 
   }
 });
 
