@@ -5,6 +5,8 @@ const {CreatetOrder,
     DeleteOrder,
     getOrdersByUserId,
     getAllOrders,
+    GetOrdersByProductOwnerId,
+    GetMonthlyIncomeByProductOwner,
     GetMonthlyIncome} = require('../controllers/ordersController.js');
 
 
@@ -25,5 +27,12 @@ router.get('/',getAllOrders);
 
 //GET MONTHLY INCOME
 router.get('/income',GetMonthlyIncome);
+
+//get by product owner 
+router.get('/productowner/:id',GetOrdersByProductOwnerId);
+
+//get monthly income by product owner
+router.get('/incomeByOwner/:id',GetMonthlyIncomeByProductOwner);
+
 
 module.exports = router;
