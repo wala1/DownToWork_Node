@@ -13,6 +13,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const testRouter = require('./routes/test');
 const quizRouter = require('./routes/quiz');
+const questionRouter = require('./routes/question');
 const postRouter = require('./routes/post');
 const topicsRouter = require('./routes/topic');
 const courseRouter = require('./routes/course');
@@ -51,6 +52,10 @@ app.use(cors());
 app.use('/', indexRouter);
 app.use('/test', testRouter);
 app.use('/quiz', quizRouter);
+<<<<<<< HEAD
+=======
+app.use('/question', questionRouter);
+>>>>>>> main
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
