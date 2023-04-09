@@ -124,7 +124,8 @@ const updateChoice = async (req, res) => {
 }
 };
 
-exports.deleteChoice = async (req, res) => {
+
+const deleteChoice = async(req,res) => {
   try {
     const { questionId, choiceId } = req.body;
     const question = await Question.findById(questionId);
@@ -147,13 +148,13 @@ exports.deleteChoice = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};
+}
 
 /* ========= GET QUESTIONS BY ID QUIZ ================*/
 const getQuestionsByIdQuiz = async(req,res) => {
   try {
     const { id } = req.query;
-    const questions = await Quiz.find({ idQuiz: id });
+    const questions = await Question.find({ idQuiz: id });
     res.status(200).json({
       message: "Questions fetched successfully!",
       questions: questions
