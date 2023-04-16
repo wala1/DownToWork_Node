@@ -12,6 +12,7 @@ const mongodbConnection = require('./config/mongoconnection.json');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const postRouter = require('./routes/post');
+const productRouter = require('./routes/product');
 const topicsRouter = require('./routes/topic');
 const courseRouter = require('./routes/course');
 const cors = require('cors');
@@ -48,9 +49,9 @@ app.use('/', indexRouter);
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
-
+app.use('/product', productRouter);
 app.use('/courses' , courseRouter);
-
+app.use('/uploads',express.static('uploads'))
 //creation du serveur
 const server = http.createServer(app); 
 server.listen(3001,()=>console.log("server is run")); //port
