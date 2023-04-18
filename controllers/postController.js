@@ -1,24 +1,40 @@
-const express = require ('express')
 const Post = require ('../models/Post')
-
+const User = require ('../models/user')
 
 //*****************************Create ****************/
 exports.add = async (req , res , next ) => {
+
+  try {
+
+  const user = await User.findById(req.user.id)
+  const newPost = new Post ( {
+   
+    text : req.body.text ,
+    user : req.user.id ,
+    name : user.name 
+
+  } )
+
+  await newPost.save().then((post)=> { res.json(post) }).catch((error)=> res.json(error))
+  
+  } catch (error) {
     
-   if(Object.keys(req.body).length === 0){
-        res.status(400).send({ message : "Content can not be emtpy!"});
-        return;
-    }
-    const newPost  = new Post({...req.body})
-   await newPost.save()
-    .then((post)=>res.status(201).json({message:"Post added with sucess !" , post }))
-    .catch(err => res.status(400).json({message : err.message || "Some error occurred while creating a Post"}));
+    res.status(500).send ( "Server Error")
+  }
   
   }
+//***************************** Enpoint to get All posts By userId ******************/
+
+  exports.findByUser = async (req, res , next) => {
+    const userId = req.params.id;
+    const userPosts = await Post.find({user: userId });
+    res.json(userPosts);
+  }
+
 //***************************** Enpoint to  (get All posts  - get post By Id )  ******************/
 exports.find = async (req , res , next ) => {
  
-    const id = req.params.id ;
+  const id = req.params.id ;
   await  (id)? Post.findOne({_id :req.params.id })
     .then((post) => {(post)? res.send(post):res.status(404).send({message :"Not found Post with id "+ req.params.id })})
     .catch((err) =>res.status(500).send({ message: "Error retrieving post with id " + req.params.id , error : +err})): Post.find()

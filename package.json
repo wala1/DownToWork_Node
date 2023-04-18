@@ -26,7 +26,7 @@
     "nodemailer": "^6.9.1",
     "nodemon": "^2.0.21",
     "randomstring": "^1.2.3",
-    "stripe": "^11.16.0",
+    "stripe": "^11.18.0",
     "yup": "^1.0.2"
   }
 }
