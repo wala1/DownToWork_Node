@@ -1,4 +1,6 @@
 const Order = require("../models/Order");
+const Product = require("../models/Product");
+
 
 //CREATE
 
@@ -60,6 +62,20 @@ const getAllOrders =  async (req, res) => {
   }
 };
 
+//get oreder by product Owner id
+const GetOrdersByProductOwnerId = async (req, res) => {
+try{const orders = await Order.find({
+  "products.productId": { $in: await Product.find({ownerId: req.params.id }).distinct("_id") }
+}).exec();
+res.status(200).json(orders);
+}
+catch(err){
+  console.log(err);
+  res.status(500).json(err);
+}
+};
+
+
 // GET MONTHLY INCOME
 
 const GetMonthlyIncome = async (req, res) => {
@@ -96,6 +112,170 @@ const GetMonthlyIncome = async (req, res) => {
     res.status(500).json(err);
   }
 };
+//get all months income 
+const GetAllMonthlyIncome = async (req, res) => {
+  const productId = req.query.pid;
+  const date = new Date();
+  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
+  const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
+
+  try {
+    const income = await Order.aggregate([
+      {
+        $match: {
+          //createdAt: { $gte: previousMonth },
+          ...(productId && {
+            products: { $elemMatch: { productId } },
+          }),
+        },
+      },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          sales: "$amount",
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          total: { $sum: "$sales" },
+        },
+      },
+    ]);
+    res.status(200).json(income);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+//get monthly income by product owner
+
+const GetMonthlyIncomeByProductOwner = async (req, res) => {
+  const ownerId = req.params.id;
+  const date = new Date();
+  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
+  const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
+
+  try {
+    const productIds = await Product.find({ ownerId }).distinct("_id");
+    console.log(productIds);
+
+    const orders = await Order.find({
+      "products.productId": { $in: productIds },
+    }).exec();
+    console.log(orders);
+
+    const orderIds = orders.map((order) => order._id);
+    console.log(orderIds);
+
+    const income = await Order.aggregate([
+      {
+        $match: {
+          _id: { $in: orderIds },
+          createdAt: { $gte: previousMonth },
+       },
+      },
+      // {
+      //   $lookup: {
+      //     from: 'products',
+      //     localField: 'products.productId',
+      //     foreignField: '_id',
+      //     as: 'product',
+      //   },
+      // },
+      // {
+      //   $unwind: '$product',
+      // },
+      // {
+      //   $match: {
+      //     'product.ownerId': ownerId,
+      //   },
+      // },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          sales: "$amount",
+        },
+      },
+      {
+        $group: {
+          _id: '$month',
+          total: { $sum: '$sales' },
+        },
+      },
+    ]);
+  
+    res.status(200).json(income);
+
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+//get all monthly income by product owner
+const GetAllMonthlyIncomeByProductOwner = async (req, res) => {
+  const ownerId = req.params.id;
+  const date = new Date();
+  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
+  const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
+
+  try {
+    const productIds = await Product.find({ ownerId }).distinct("_id");
+    console.log(productIds);
+
+    const orders = await Order.find({
+      "products.productId": { $in: productIds },
+    }).exec();
+    console.log(orders);
+
+    const orderIds = orders.map((order) => order._id);
+    console.log(orderIds);
+
+    const income = await Order.aggregate([
+      {
+        $match: {
+          _id: { $in: orderIds },
+          //createdAt: { $gte: previousMonth },
+       },
+      },
+      // {
+      //   $lookup: {
+      //     from: 'products',
+      //     localField: 'products.productId',
+      //     foreignField: '_id',
+      //     as: 'product',
+      //   },
+      // },
+      // {
+      //   $unwind: '$product',
+      // },
+      // {
+      //   $match: {
+      //     'product.ownerId': ownerId,
+      //   },
+      // },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          sales: "$amount",
+        },
+      },
+      {
+        $group: {
+          _id: '$month',
+          total: { $sum: '$sales' },
+        },
+      },
+    ]);
+  
+    res.status(200).json(income);
+
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+
 
 module.exports = {
     CreatetOrder,
@@ -103,5 +283,9 @@ module.exports = {
     DeleteOrder,
     getOrdersByUserId,
     getAllOrders,
-    GetMonthlyIncome
+    GetMonthlyIncome,
+    GetOrdersByProductOwnerId,
+    GetMonthlyIncomeByProductOwner,
+    GetAllMonthlyIncome,
+    GetAllMonthlyIncomeByProductOwner,
 };
