@@ -57,6 +57,7 @@ const userSchema = mongoose.Schema(
       type : Boolean,
       default: false,
     }, 
+    activationCode: String,
     isActivated : {
       type : Boolean,
       default: true,

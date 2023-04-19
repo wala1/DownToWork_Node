@@ -28,9 +28,9 @@ const upload = multer({
 router.use('/topicImage', express.static('public/images')); 
 router.get('/' ,  TopicsList);
 router.post('/add' ,validate , upload.single('topicImage') , addTopic);
-router.put('/:id', validate , updateTopic);
-router.delete('/:id', deleteTopic);
-router.get('/:id' , topicById);
+router.put('/update/:id', validate , updateTopic);
+router.delete('/delete/:id', deleteTopic);
+router.get('/find/:id' , topicById);
 
 
 module.exports=router;

@@ -2,14 +2,18 @@ const express = require ('express')
 const router = express.Router()
 const Post = require ('../models/Post')
 const PostController = require ('../controllers/postController')
-
+const {protect} = require ('../middleWares/authMiddleWare')
+const postValidator = require ('../middleWares/postValidator')
 
 
 // Route pour ajouter une publication dans la base de donnèe
-router.post("/add" , PostController.add)
+router.post("/add" , protect , postValidator, PostController.add)
 
 // Route pour récupérer toutes les publications  de la base de donnèe
 router.get('/getAll', PostController.find);
+
+// Route pour récupérer toutes les publications  de la base de donnèe
+router.get('/getAllByUser/:id', PostController.findByUser);
 
 // Route pour récupérer une publication  par son ID
 router.get('/getById/:id', PostController.find);

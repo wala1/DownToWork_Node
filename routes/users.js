@@ -28,6 +28,7 @@ router.post('/delete-account', deleteAccount );
 router.post('/forget-password', forgetPassword );
 router.post('/verification-code' , verifyCode);
 router.post('/change-password',ChangePassword);
+router.post('/verifyUser/:activationCode',verifyUser);
 
 
 // /* GET users listing. */

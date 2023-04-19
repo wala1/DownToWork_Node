@@ -1,58 +1,33 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const mongoose = require('mongoose')
 
-const productSchema = new Schema({
-  id: {
-    type: String,
-    required: true
-  },
-  ownerId: {
-    type: String,
-    required: true
-  },
-  prodName: {
-    type: String,
-    required: true
-  },
-  prodDesc: {
-    type: String,
-    required: true
-  },
+
+
+const ProductSchema = mongoose.Schema({
+
+  prodName: { type: String },
+  prodDesc: { type: String },
   prodImg: {
-    type: String,
-    required: true
+    data: Buffer,
+    contentType: String,
+    imgUrl: String
   },
-  prodPrice: {
-    type: Number,
-    required: true
-  },
-  prodAvail: {
-    type: Boolean,
-    required: true
-  },
-  prodBrand: {
-    type: String,
-    required: true
-  },
-  prodCateg: {
-    type: String,
-    required: true
-  },
-  prodReviews: {
-    type: String,
-    required: true
-  },
-  prodRate: {
-    type: Number,
-    required: true
-  },
-  __v: {
-    type: Number,
-    required: true,
-    default: 0
-  }
+  prodPrice: { type: Number },
+  prodAvail: { type: Boolean, default: true },
+  prodBrand: { type: String },
+  prodCateg: { type: String },
+  prodReviews: { type: String },
+  prodRate: { type: Number ,default:0 },
+  ownerId:{type:String}
+})
+
+
+ProductSchema.pre('findOneAndUpdate', function (next) {
+  console.log('Middleware pre-hook called!');
+  const currentDate = new Date();
+  // this.update({ updated_at: currentDate });
+  this.set({ updated_at: currentDate });
+  next();
 });
 
-const Product = mongoose.model('Product', productSchema);
 
-module.exports = Product;
+module.exports = mongoose.model('Product', ProductSchema)

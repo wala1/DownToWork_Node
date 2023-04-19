@@ -8,6 +8,10 @@ const topicSchema = new mongoose.Schema({
     topicImg : {
         type : String,
         required : true
+    },
+    TopicDesc : {
+        type : String,
+        required : true
     }
 })
 //class
