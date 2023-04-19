@@ -1,30 +1,25 @@
 const Test = require('../models/test');
 
-/* ========= ADD TEST ================*/
-const addTest = async(req, res, next) => {
-  try {
-    const { name, category, nbrQuiz, nbrParticipant, description, picture, creator } = req.body;
-    const test = new Test({
-      name,
-      category,
-      nbrQuiz,
-      nbrParticipant,
-      description,
-      picture,
-      creator
-    });
-    const result = await test.save();
-    res.status(201).json({
-      message: "Test added successfully!",
-      test: result
-    });
-  } catch (error) {
-    res.status(400).send({ success: false, msg: error.message });
-  }
+const addTest = async (req, res, next) => {
+  console.log(req.picture);
+
+  let test = new Test({
+    name: req.body.name,
+    category: req.body.category,
+    nbrQuiz: req.body.nbrQuiz,
+    nbrParticipant: req.body.nbrParticipant,
+    description: req.body.description,
+    picture: req.body.picture,
+    creator: req.body.creator
+  });
+
+  test = await test.save();
+  res.send(test);
 }
 
+
 /* ========= ALL TEST ================*/
-const allList = async(req, res, next) => {
+const allList = async (req, res, next) => {
   try {
     const tests = await Test.find();
     res.status(200).json({
@@ -37,7 +32,7 @@ const allList = async(req, res, next) => {
 }
 
 /* ========= UPDATE TEST ================*/
-const updateTest = async(req,res) => {
+const updateTest = async (req, res) => {
   try {
     const { id, name, category, nbrQuiz, nbrParticipant, description, picture, creator } = req.body;
     const result = await Test.findByIdAndUpdate(id, {
@@ -59,21 +54,15 @@ const updateTest = async(req,res) => {
 }
 
 /* ========= GET TEST BY ID ================*/
-const getTestById = async(req,res) => {
-  try {
-    const { id } = req.body;
-    const test = await Test.findById(id);
-    res.status(200).json({
-      message: "Test fetched successfully!",
-      test: test
-    });
-  } catch (error) {
-    res.status(400).send({ success: false, msg: error.message });
-  }
+const getTestById = async (req, res) => {
+  const test = await Test.findById(req.params.id);
+  if (!test) return res.status(404).json({ message: "Test not found" });
+  res.status(200).json({ message: "Test fetched successfully!", test: test });
 }
 
+
 /* ========= GET TEST BY TYPE ================*/
-const getTestByType = async(req,res) => {
+const getTestByType = async (req, res) => {
   try {
     const { category } = req.body;
     const tests = await Test.find({ category: category });
@@ -87,7 +76,7 @@ const getTestByType = async(req,res) => {
 }
 
 /* ========= DELETE TEST ================*/
-const deleteTest = async(req,res) => {
+const deleteTest = async (req, res) => {
   try {
     const { id } = req.body;
     await Test.findByIdAndDelete(id);
@@ -124,11 +113,11 @@ const getTestPagination = async (req, res) => {
 
 
 module.exports = {
-  addTest, 
-  allList , 
-  updateTest, 
-  getTestById, 
-  getTestByType , 
+  allList,
+  addTest,
+  updateTest,
+  getTestById,
+  getTestByType,
   deleteTest,
   getTestPagination
 }

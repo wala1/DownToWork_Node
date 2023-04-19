@@ -7,7 +7,7 @@ const testSchema = mongoose.Schema({
     nbrQuiz:        { type: String, required: true},
     nbrParticipant: { type: String, required: true},
     description:    { type: String, required: true},
-    picture:        { type: String, required: true, unique: true},
+    picture:        { type: String, required: true},
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
