@@ -15,6 +15,14 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
     },
+    picture: {
+      type: String,
+      required: [false, 'Please add your picture'],
+    },
+    googleId: {
+      type: String,
+      required: false,
+    },
     DateOfBirth: {
       type: Date,
       format: 'yyyy-MM-dd',
@@ -49,6 +57,7 @@ const userSchema = mongoose.Schema(
       type : Boolean,
       default: false,
     }, 
+    activationCode: String,
     isActivated : {
       type : Boolean,
       default: true,

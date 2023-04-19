@@ -6,17 +6,20 @@ async function TopicsList  (req , res , next )  {
 async function addTopic(req , res , next){
     let topic = new Topic({
         topicName : req.body.topicName,
-        topicImg : `http://localhost:3000/topicImage/${req.file.filename}`
+        topicImg : req.body.topicImg,
+        //`http://localhost:3001/topicImage/${req.file.filename}`
+        TopicDesc : req.body.TopicDesc
     })
     topic = await topic.save();
-    console.log(req.file)
     res.send(topic);
 
 };
 async function updateTopic(req , res , next){
     const topic = await Topic.findByIdAndUpdate(req.params.id ,
          {topicImg : req.body.topicImg,
-          topicName : req.body.topicName } ,
+          topicName : req.body.topicName ,
+          TopicDesc : req.body.TopicDesc
+        } ,
          { new : true});
     if(!topic){
         return res.status(404).send('the topic with the given id was not found');

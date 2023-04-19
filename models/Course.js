@@ -10,11 +10,18 @@ const schemaCourse = new mongoose.Schema({
         type : String ,
         required : true
     },
-   
     Level : {
         type : String , 
         required : true
-    } ,
+    },
+    imageCourse : {
+        type : String , 
+        required : true
+    },
+    type : {
+        type : String , 
+        required : true
+    },
     topic : {
         type : topicSchema,
         required : true

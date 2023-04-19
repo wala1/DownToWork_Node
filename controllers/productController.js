@@ -79,3 +79,20 @@ exports.update = (req, res) => {
         .then(product => { (!product) ? res.status(404).send({ message: `Cannot Update product with ${id}. Maybe product not found!` }) : res.send(product) })
         .catch(err => res.status(500).send({ message: "Error Update product information", error: +err }))
 }
+
+//get products by ownerId
+exports.findProductByOwnerId = (req, res, next) => {
+    const id = req.params.id;
+    Product.find({ ownerId: id })
+      .then((products) => {
+        const productIds = products.map((element) => element._id);
+        res.send(productIds);
+      })
+      .catch((err) => res.send({ message: "Error retrieving products", error: err }));
+  };
+  
+
+
+
+
+
