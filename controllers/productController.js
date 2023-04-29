@@ -80,6 +80,20 @@ exports.update = (req, res) => {
         .catch(err => res.status(500).send({ message: "Error Update product information", error: +err }))
 }
 
+//update product
+exports.updateProduct = (req, res) => {
+    const id = req.params.id;
+    const product = req.body;
+    Product.findByIdAndUpdate(id, product, { useFindAndModify: false })
+        .then((data) => {
+            (!data) ? res.status(404).send({ message: `Cannot Update product with ${id}. Maybe product not found!` }) : res.send({ message: "product was updated successfully." })
+        })
+        .catch((err) => res.status(500).send({ message: "Error Update product information", error: +err }))
+}
+
+
+
+
 //get products by ownerId
 exports.findProductByOwnerId = (req, res, next) => {
     const id = req.params.id;
@@ -90,7 +104,17 @@ exports.findProductByOwnerId = (req, res, next) => {
       })
       .catch((err) => res.send({ message: "Error retrieving products", error: err }));
   };
-  
+  //get product details by owner Id
+    exports.findProductDetailsByOwnerId = (req, res, next) => {
+        const id = req.params.id;
+        Product.find({ ownerId: id })
+          .then((products) => {
+            const UserProducts = products.map((element) => element);
+            res.send(UserProducts);
+          })
+          .catch((err) => res.send({ message: "Error retrieving products", error: err }));
+      };
+
 
 
 
