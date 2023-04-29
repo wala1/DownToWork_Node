@@ -31,7 +31,11 @@ router.delete('/delete/:id', productController.delete);
 // Route pour modifier un produit par son ID
 router.put('/update/:id', productController.update);
 
+router.put('/updateProduct/:id', productController.updateProduct);
+
 router.get('/getByOwner/:id', productController.findProductByOwnerId)
+
+router.get('/getProdByOwner/:id', productController.findProductDetailsByOwnerId)
 
 
 module.exports=router
