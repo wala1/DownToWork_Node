@@ -60,9 +60,7 @@ app.use('/post', postRouter);
 app.use('/orders' , ordersRouter);
 app.use('/courses' , courseRouter);
 app.use('/checkout' , stripeRouter);
-
 app.use('/product', productRouter);
-app.use('/courses' , courseRouter);
 app.use('/uploads',express.static('uploads'))
 //creation du serveur
 const server = http.createServer(app); 
