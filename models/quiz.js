@@ -6,7 +6,7 @@ const quizSchema = mongoose.Schema({
     type: { type: String, enum: ["communication", "reading"], required: true },
     nbrQuestion: { type: Number, required: true },
     description:    { type: String, required: true},
-    picture: { type: String, required: true, unique: true },
+    picture: { type: String, required: true},
     idTest: { type: mongoose.Schema.Types.String, ref: "Test" }
 });
 

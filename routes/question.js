@@ -3,7 +3,7 @@ const router = express.Router();
 const { createQuestion, updateQuestion, deleteQuestion, getAllQuestions, getQuestionById, getQuestionsByType, addChoice, updateChoice, deleteChoice, getQuestionsByIdQuiz } = require('../controllers/questionController');
 
 router.get('/', getAllQuestions);
-router.post('/add', createQuestion);
+router.post('/addQuestion', createQuestion);
 router.put('/update/:id', updateQuestion);
 router.delete('/delete/:id', deleteQuestion);
 router.get('/getQuestionById/:id', getQuestionById);

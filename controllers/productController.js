@@ -1,5 +1,5 @@
 const express = require('express')
-const Product = require('../models/Product')
+const Product= require('../models/Product')
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -42,8 +42,10 @@ exports.add = (req, res, next) => {
 
 //***************************** Enpoint to  (get All products  - get product By Id )  ******************/
 exports.find = (req, res, next) => {
-
+    
+    
     const id = req.params.id;
+    console.log('Received request for ID:', id);
     (id) ? Product.findOne({ _id: req.params.id })
         .then((product) => { (product) ? res.send(product) : res.status(404).send({ message: "Not found Product with id " + req.params.id }) })
         .catch((err) => res.status(500).send({ message: "Error retrieving product with id " + req.params.id, error: +err })) : Product.find()
@@ -66,16 +68,31 @@ exports.delete = (req, res) => {
 
 //**************************** Endpoint to update a product **************** */
 exports.update = (req, res) => {
+  
 
     if (Object.keys(req.body).length === 0) { return res.status(400).send({ message: "product with new informations must be provided" }) }
 
     const id = req.params.id;
     //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
     //The { new: true } option tells Mongoose to return the updated document instead of the original one.
-    Product.findOneAndUpdate({ _id: id }, { $set: req.body }, { useFindAndModify: false, new: true })
+    Product.findOneAndUpdate({ _id: id }, { prodRate:req.body.prodRate }, { useFindAndModify: false, new: true })
         .then(product => { (!product) ? res.status(404).send({ message: `Cannot Update product with ${id}. Maybe product not found!` }) : res.send(product) })
         .catch(err => res.status(500).send({ message: "Error Update product information", error: +err }))
 }
+
+//update product
+exports.updateProduct = (req, res) => {
+    const id = req.params.id;
+    const product = req.body;
+    Product.findByIdAndUpdate(id, product, { useFindAndModify: false })
+        .then((data) => {
+            (!data) ? res.status(404).send({ message: `Cannot Update product with ${id}. Maybe product not found!` }) : res.send({ message: "product was updated successfully." })
+        })
+        .catch((err) => res.status(500).send({ message: "Error Update product information", error: +err }))
+}
+
+
+
 
 //get products by ownerId
 exports.findProductByOwnerId = (req, res, next) => {
@@ -87,7 +104,17 @@ exports.findProductByOwnerId = (req, res, next) => {
       })
       .catch((err) => res.send({ message: "Error retrieving products", error: err }));
   };
-  
+  //get product details by owner Id
+    exports.findProductDetailsByOwnerId = (req, res, next) => {
+        const id = req.params.id;
+        Product.find({ ownerId: id })
+          .then((products) => {
+            const UserProducts = products.map((element) => element);
+            res.send(UserProducts);
+          })
+          .catch((err) => res.send({ message: "Error retrieving products", error: err }));
+      };
+
 
 
 
