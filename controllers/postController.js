@@ -42,7 +42,33 @@ exports.find = async (req , res , next ) => {
     .catch((err)=> res.send({message : "Error retrieving posts"  , error : err}))
 } 
 
-//**************************** Endpoint to delete a post **************** */
+//**************************** Endpoint to delete a post  // DELETE /posts/:postId **************** */
+// DELETE /posts/:postId
+  exports.deletee =  async (req, res) => {
+  try {
+    console.log('Hello from deletee');
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      console.log('Publication introuvable');
+      return res.status(404).json({ message: 'Publication introuvable' });
+    }
+
+    // Vérifiez si l'utilisateur qui a créé la publication est celui qui essaie de la supprimer
+    if (post.user.toString() !== req.user.id) {
+      console.log('Non autorisé');
+      return res.status(401).json({ message: 'Non autorisé' });
+    }
+
+    await post.remove();
+    console.log('Publication supprimée');
+    res.json({ message: 'Publication supprimée' });
+    
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erreur serveur');
+  }
+  }
 
 exports.delete = async (req, res)=>{
     const id = req.params.id;
