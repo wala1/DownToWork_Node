@@ -395,13 +395,27 @@ const updateImg = async (req, res) => {
     user.picture.imagePath = req.file.path;
 
     await user.save ();
-    return res.status (200).json ({msg: 'Profile picture updated successfully'});
-    
+    return res
+      .status (200)
+      .json ({msg: 'Profile picture updated successfully'});
   } catch (err) {
     console.log (err);
     return res.status (500).send ('Server Error');
   }
+};
 
+//         Enpoint to get All users
+
+const findAll = async (req, res, next) => {
+  console.log ('hello from get users');
+  User.find ()
+    .then (users => {
+      res.setHeader('Cache-Control', 'no-cache, no-store');
+      res.setHeader('Expires', '0');
+      res.status(200).send(users);
+      console.log(users);
+    })
+    .catch(err => res.status(500).send({message: 'Error retrieving users'}));
 };
 /*   ############################  PASSWORD RECOVERY ######################################### */
 
@@ -616,6 +630,7 @@ module.exports = {
   desactivateAccount,
   update,
   updateImg,
+  findAll,
   registerUser,
   LoginUser,
   signinController,
