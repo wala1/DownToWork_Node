@@ -48,7 +48,7 @@ const questionSchema = mongoose.Schema({
     required: true
   },
   idQuiz: {
-    type: mongoose.Schema.Types.String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Quiz"
   },
   idCourse: {

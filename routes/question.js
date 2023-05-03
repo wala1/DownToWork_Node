@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { createQuestion, updateQuestion, deleteQuestion, getAllQuestions,copyQuestion, updateQuestionParameterId, getQuestionById, getQuestionsByType, addChoice, updateChoice, deleteChoice, getQuestionsByIdQuiz, getQuestionsPagination } = require('../controllers/questionController');
+const { createQuestion, updateQuestion, deleteQuestion,getQuestionsByQuizId, getAllQuestions,copyQuestion, updateQuestionParameterId, getQuestionById, getQuestionsByType, addChoice, updateChoice, deleteChoice, getQuestionsByIdQuiz, getQuestionsPagination } = require('../controllers/questionController');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -34,5 +34,6 @@ router.post('/addChoice/:id/choices', addChoice);
 router.put('/updateChoice/:id/choices/:choiceId', updateChoice);
 router.delete('/deleteChoice/:id/choices/:choiceId', deleteChoice);
 router.get('/getQuestionsByIdQuiz', getQuestionsByIdQuiz);
+router.get('/getQuestionsByQuizId/:id', getQuestionsByQuizId);
 
 module.exports = router;

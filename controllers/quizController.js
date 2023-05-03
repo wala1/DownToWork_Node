@@ -86,10 +86,13 @@ const updateQuiz = async (req, res) => {
 
 /* ========= GET QUIZ BY ID ================*/
 const getQuizById = async (req, res) => {
-
-  const quiz = await Quiz.findById(req.params.id);
-  if (!quiz) return res.status(404).json({ message: "Quiz not found" });
-  res.status(200).json({ message: "Quiz fetched successfully!", quiz: quiz });
+  try {
+    const quiz = await Quiz.findById(req.params.id);
+    res.json(quiz);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
 }
 
 /* ========= GET QUIZ BY TYPE ================*/

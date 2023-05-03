@@ -201,6 +201,22 @@ const getQuestionsByIdQuiz = async (req, res) => {
   }
 }
 
+
+/* ========= GET QUESTIONS BY ID QUIZ ================*/
+const getQuestionsByQuizId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const questions = await Question.find({ idQuiz: id });
+    res.status(200).json({
+      message: "Questions fetched successfully!",
+      questions: questions
+    });
+  } catch (error) {
+    res.status(400).send({ success: false, msg: error.message });
+  }
+}
+
+
 /* ========= GET LIST OF QUESTION PAGINATION ================*/
 const getQuestionsPagination = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -282,5 +298,6 @@ module.exports = {
   getQuestionsByIdQuiz,
   getQuestionsPagination,
   updateQuestionParameterId,
-  copyQuestion
+  copyQuestion,
+  getQuestionsByQuizId
 };

@@ -1,28 +1,18 @@
 const Trial = require('../models/trial');
-const { validationResult } = require('express-validator');
 
 // Create a new trial
-const createTrial = async (req, res) => {
+const saveTrialData = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const { userId, quizId, startTime, endTime, answers } = req.body;
-    const trial = new Trial({
-      user: userId,
-      quiz: quizId,
-      startTime,
-      endTime,
-      answers
-    });
-    const newTrial = await trial.save();
-    res.status(201).json(newTrial);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    const trial = new Trial(req.body);
+    await trial.save();
+    console.log('Trial data saved successfully!');
+    res.status(201).json({ message: 'Trial data saved successfully!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'An error occurred while saving trial data.' });
   }
 };
+
 
 // Get a single trial by ID
 const getTrialById = async (req, res) => {
@@ -74,9 +64,22 @@ const getTrialsByTimePeriod = async (req, res) => {
   }
 };
 
+// Get all trials within a specified time period for a user
+const getTrialByIdUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const trial = await Trial.findOne({ userId }).sort({ endDate: -1 });
+    res.status(200).json({ trial });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
-  createTrial,
+  saveTrialData,
   getTrialById,
+  getTrialByIdUser,
   getAllTrialsForUser,
   getAllTrialsForQuiz,
   getTrialsByTimePeriod
