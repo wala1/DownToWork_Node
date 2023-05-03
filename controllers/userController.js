@@ -317,20 +317,22 @@ const GetUser = asyncHandler (async (req, res) => {
 //             Fetch User By id
 const findById = (req, res, next) => {
   const id = req.params.id;
-  User.findOne ({_id: req.params.id})
-    .then (user => {
-      user
-        ? res.send (user)
-        : res
-            .status (400)
-            .send ({message: 'Not found user with id ' + req.params.id});
+  User.findOne({_id: req.params.id})
+    .then(user => {
+      if (user) {
+        res.setHeader('Cache-Control', 'no-cache, no-store');
+        res.setHeader('Expires', '0');
+        res.send(user);
+      } else {
+        res.status(400).send({message: 'Not found user with id ' + req.params.id});
+      }
     })
-    .catch (err =>
-      res.status (500).send ({
+    .catch(err => {
+      res.status(500).send({
         message: 'Error retrieving user with id ' + req.params.id,
         error: +err,
-      })
-    );
+      });
+    });
 };
 
 //            Desactivate account
