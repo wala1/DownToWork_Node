@@ -1,6 +1,7 @@
+const { request } = require('http');
 const {schemaCourse ,  Course} = require('../models/Course');
 const {Topic} =  require('../models/Topics');
-
+const cors = require('cors');
 async function courseList(req , res , next){
     const course = await Course.find();
     res.send(course);
@@ -80,6 +81,19 @@ const getALLCourses = async (req, res, next) => {
     }
   }
 
+async function downloadPdf(req,res){
+    res.download('./uploads/image.png');
+
+}
+async function uploadFile(req,res){
+    console.log('request file : ' , req.file);
+    console.log('request body : ' , req.body);
+    res.json({
+        fullName : req.body.fullName,
+        asset : req.file.path
+    })
+
+}
 exports.addCourse = addCourse;
 exports.updateCourse = updateCourse;
 exports.getCourse = getCourse;
@@ -87,6 +101,8 @@ exports.deleteCourse = deleteCourse;
 exports.courseList = courseList;
 exports.findCourseByType = findCourseByType;
 exports.findCourseByTopic = findCourseByTopic;
+exports.downloadPdf = downloadPdf;
+exports.uploadFile = uploadFile;
 
 module.exports = {
     getALLCourses

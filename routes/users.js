@@ -1,9 +1,23 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword , blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword , blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser, updateImg, findOneOrAll, findAll} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 const { signinController, signupController, deleteAccount } = require("../controllers/userController")
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + '-' + file.originalname)
+    }
+  });
+  
+const upload = multer({ storage: storage });
 
 
 router.post('/register',validate,registerUser);
@@ -12,12 +26,18 @@ router.post('/login', LoginUser);
 router.post("/signin", signinController);
 router.post("/signup", signupController);
 router.get('/getuser', protect, GetUser);
+// Route pour récupérer un utilisateur par son ID
 router.get('/getById/:id', findById );
+// Route pour récupérer tous les utilisateurs de la base de donnèe
+router.get('/', findAll);
 router.put('/update/:id', update );
 router.put('/desactivate/:id', desactivateAccount )
 router.get('/block-user/:id' , blockUser);
 router.get('/unblock-user/:id',unblockUser);
 router.post('/delete-account', deleteAccount );
+router.put('/updateImg/:id',upload.single('picture'),updateImg)
+router.get('/unblock-user/:id',unblockUser);
+
 
 // router.post("/api/user", async (req, res) => {
 //     const userData = req.body;

@@ -21,6 +21,7 @@ const topicsRouter = require('./routes/topic');
 const courseRouter = require('./routes/course');
 const ordersRouter = require('./routes/orders');
 const stripeRouter = require('./routes/stripe');
+const chatRouter = require('./routes/chat');
 const cors = require('cors');
 
 const app = express();
@@ -36,7 +37,6 @@ dotenv.config();
       console.error(error);
     }
   })();
-
 
 
 // view engine setup
@@ -62,6 +62,7 @@ app.use('/post', postRouter);
 app.use('/orders' , ordersRouter);
 app.use('/courses' , courseRouter);
 app.use('/checkout' , stripeRouter);
+app.use('/chat', chatRouter);
 app.use('/product', productRouter);
 app.use('/uploads',express.static('uploads'))
 //creation du serveur
