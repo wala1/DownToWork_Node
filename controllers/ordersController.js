@@ -106,6 +106,11 @@ const GetMonthlyIncome = async (req, res) => {
           total: { $sum: "$sales" },
         },
       },
+      {
+        $sort: {
+          _id: 1,
+        },
+      }
     ]);
     res.status(200).json(income);
   } catch (err) {
@@ -141,6 +146,11 @@ const GetAllMonthlyIncome = async (req, res) => {
           total: { $sum: "$sales" },
         },
       },
+      {
+        $sort: {
+          _id: 1,
+        },
+      }
     ]);
     res.status(200).json(income);
   } catch (err) {
@@ -203,6 +213,11 @@ const GetMonthlyIncomeByProductOwner = async (req, res) => {
           total: { $sum: '$sales' },
         },
       },
+      {
+        $sort: {
+          _id: 1,
+        },
+      }
     ]);
   
     res.status(200).json(income);
