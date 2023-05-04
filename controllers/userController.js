@@ -627,6 +627,21 @@ const unblockUser = async (req, res) => {
   }
 };
 
+const classification = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const level = req.params.level;
+
+    const user = await User.findByIdAndUpdate(userId, { classification: level }, { new: true });
+
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+
 module.exports = {
   findById,
   desactivateAccount,
@@ -635,6 +650,7 @@ module.exports = {
   findAll,
   registerUser,
   LoginUser,
+  classification,
   signinController,
   signupController,
   GetUser,

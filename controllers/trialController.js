@@ -14,56 +14,6 @@ const saveTrialData = async (req, res) => {
 };
 
 
-// Get a single trial by ID
-const getTrialById = async (req, res) => {
-  try {
-    const trial = await Trial.findById(req.params.id);
-    if (!trial) {
-      return res.status(404).json({ message: 'Trial not found' });
-    }
-    res.json(trial);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Get all trials for a user
-const getAllTrialsForUser = async (req, res) => {
-  try {
-    const { userId } = req.body;
-    const trials = await Trial.find({ user: userId });
-    res.json(trials);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Get all trials for a quiz
-const getAllTrialsForQuiz = async (req, res) => {
-  try {
-    const { quizId } = req.body;
-    const trials = await Trial.find({ quiz: quizId });
-    res.json(trials);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Get all trials within a specified time period for a user
-const getTrialsByTimePeriod = async (req, res) => {
-  try {
-    const { userId, startDate, endDate } = req.body;
-    const trials = await Trial.find({ user: userId, startTime: { $gte: startDate, $lt: endDate } });
-    res.json(trials);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
 // Get all trials within a specified time period for a user
 const getTrialByIdUser = async (req, res) => {
   try {
@@ -78,9 +28,5 @@ const getTrialByIdUser = async (req, res) => {
 
 module.exports = {
   saveTrialData,
-  getTrialById,
   getTrialByIdUser,
-  getAllTrialsForUser,
-  getAllTrialsForQuiz,
-  getTrialsByTimePeriod
 };
