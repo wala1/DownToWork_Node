@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const router = express.Router();
 const { addCourse, courseList , updateCourse , getCourse ,deleteCourse , findCourseByType,findCourseByTopic,getALLCourses, downloadPdf,uploadFile} = require('../controllers/courseController');
 

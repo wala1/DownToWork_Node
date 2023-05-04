@@ -67,19 +67,17 @@ async function deleteCourse(req , res){
     res.send(course);
 };
 
-
-/* ========= ALL TEST ================*/
-const getALLCourses = async (req, res, next) => {
+async function getALLCourses(req , res){
     try {
-      const courses = await Course.find();
-      res.status(200).json({
-        message: "Courses fetched successfully!",
-        courses: courses
-      });
-    } catch (error) {
-      res.status(400).send({ success: false, msg: error.message });
-    }
-  }
+        const courses = await Course.find();
+        res.status(200).json({
+          message: "Courses fetched successfully!",
+          courses: courses
+        });
+      } catch (error) {
+        res.status(400).send({ success: false, msg: error.message });
+      }
+};
 
 async function downloadPdf(req,res){
     res.download('./uploads/image.png');
@@ -103,7 +101,4 @@ exports.findCourseByType = findCourseByType;
 exports.findCourseByTopic = findCourseByTopic;
 exports.downloadPdf = downloadPdf;
 exports.uploadFile = uploadFile;
-
-module.exports = {
-    getALLCourses
-}
+exports.getALLCourses = getALLCourses;
