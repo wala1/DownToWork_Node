@@ -14,6 +14,7 @@ const usersRouter = require('./routes/users');
 const testRouter = require('./routes/test');
 const quizRouter = require('./routes/quiz');
 const questionRouter = require('./routes/question');
+const trialRouter = require('./routes/trial');
 const postRouter = require('./routes/post');
 const productRouter = require('./routes/product');
 const topicsRouter = require('./routes/topic');
@@ -54,6 +55,7 @@ app.use('/', indexRouter);
 app.use('/test', testRouter);
 app.use('/quiz', quizRouter);
 app.use('/question', questionRouter);
+app.use('/trial', trialRouter);
 app.use('/topics', topicsRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
@@ -62,7 +64,6 @@ app.use('/courses' , courseRouter);
 app.use('/checkout' , stripeRouter);
 app.use('/chat', chatRouter);
 app.use('/product', productRouter);
-app.use('/courses' , courseRouter);
 app.use('/uploads',express.static('uploads'))
 //creation du serveur
 const server = http.createServer(app); 

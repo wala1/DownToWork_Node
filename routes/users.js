@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword , blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser, updateImg, findOneOrAll, findAll, changePwd} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword ,classification, blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser, updateImg, findOneOrAll, findAll, changePwd} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 const { signinController, signupController, deleteAccount } = require("../controllers/userController")
@@ -34,6 +34,7 @@ router.get('/getById/:id', findById );
 router.get('/', findAll);
 // Route pour modifier un utilisateur de la base de donnèe
 router.put('/update/:id', update );
+router.put('/classification/:id/:level', classification);
 // Route pour desactiver le compte d'un utilisateur
 router.put('/desactivate/:id', desactivateAccount )
 // Route pour changer le password d'un utilisateur
@@ -44,6 +45,7 @@ router.put('/updateImg/:id',upload.single('picture'),updateImg)
 
 
 router.get('/unblock-user/:id',unblockUser);
+
 router.get('/block-user/:id' , blockUser);
 router.post('/delete-account', deleteAccount );
 // router.post("/api/user", async (req, res) => {

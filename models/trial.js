@@ -26,12 +26,10 @@ const trialSchema = new mongoose.Schema({
     questionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Question',
-      required: true,
     },
     selectedChoice: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Choice',
-      required: true,
     },
   }],
 });

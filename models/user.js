@@ -19,6 +19,7 @@ const userSchema = mongoose.Schema(
       type: String,
       default: 'Web Designer | Architect'
     },
+    classification:{type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
     picture: {
       data: {
         type: Buffer,

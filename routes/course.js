@@ -1,7 +1,8 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const router = express.Router();
-const { addCourse, courseList , updateCourse , getCourse ,deleteCourse , findCourseByType,findCourseByTopic,downloadPdf,uploadFile} = require('../controllers/courseController');
+const { addCourse, courseList , updateCourse , getCourse ,deleteCourse , findCourseByType,findCourseByTopic,getALLCourses, downloadPdf,uploadFile} = require('../controllers/courseController');
 
 // Storage engine 
 const storage = multer.diskStorage({
@@ -26,6 +27,7 @@ router.put('/update/:id' , updateCourse);
 router.post('/delete/:id' , deleteCourse);
 router.get('/find-type/:type' , findCourseByType);
 router.get('/find-topic/:topicName' , findCourseByTopic);
+router.get('/getCources' ,getALLCourses);
 router.get('/download-course' , downloadPdf);
 router.post('/uploadd',upload.single("asset"),uploadFile)
 
