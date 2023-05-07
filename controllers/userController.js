@@ -383,6 +383,31 @@ const update = async (req, res) => {
     );
 };
 
+//           Change Password 
+
+const changePwd = async (req, res) => {
+  console.log('Hello from change password');
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Incorrect password' });
+    }
+    const salt = await bcrypt.genSalt (10);
+    const hashedPassword = await bcrypt.hash (newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 //           Update photo profile
 
 const updateImg = async (req, res) => {
@@ -399,7 +424,7 @@ const updateImg = async (req, res) => {
     await user.save ();
     return res
       .status (200)
-      .json ({msg: 'Profile picture updated successfully'});
+      .json ({user});
   } catch (err) {
     console.log (err);
     return res.status (500).send ('Server Error');
@@ -549,6 +574,7 @@ const verifyCode = async (req, res) => {
 };
 
 /// change pass
+
 const ChangePassword = async (req, res) => {
   console.log (req.body);
   let user = await User.findOne ({otp: req.body.otp});
@@ -566,6 +592,7 @@ const ChangePassword = async (req, res) => {
       res.send ({code: 500, message: 'Server err'});
     });
 };
+
 const submitotp = async (req, res) => {
   console.log (req.body);
   let user = await User.findOne ({otp: req.body.otp});
@@ -630,6 +657,7 @@ const unblockUser = async (req, res) => {
 module.exports = {
   findById,
   desactivateAccount,
+  changePwd,
   update,
   updateImg,
   findAll,
