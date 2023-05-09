@@ -31,12 +31,22 @@ exports.add = async (req , res , next ) => {
     res.json(userPosts);
   }
 
+  //***************************** Enpoint to get All posts By userId ******************/
+
+  exports.findAll = async (req, res , next) => {
+    const Posts = await Post.find();
+    res.setHeader('Cache-Control', 'no-cache, no-store');
+    res.setHeader('Expires', '0');
+    res.send(Posts);
+  }
+
+
 //***************************** Enpoint to  (get All posts  - get post By Id )  ******************/
 exports.find = async (req , res , next ) => {
  
   const id = req.params.id ;
   await  (id)? Post.findOne({_id :req.params.id })
-    .then((post) => {(post)? res.send(post):res.status(404).send({message :"Not found Post with id "+ req.params.id })})
+    .then((post) => {(post)?  res.send(post):res.status(404).send({message :"Not found Post with id "+ req.params.id })})
     .catch((err) =>res.status(500).send({ message: "Error retrieving post with id " + req.params.id , error : +err})): Post.find()
     .then((posts) => res.send(posts))
     .catch((err)=> res.send({message : "Error retrieving posts"  , error : err}))

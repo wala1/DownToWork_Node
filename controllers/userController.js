@@ -10,6 +10,7 @@ const mailConfig = require ('../config/configMail.json');
 const multer = require ('multer');
 const path = require ('path');
 const fs = require ('fs');
+const sendCredentials = require ('../ConfigMailing');
 
 /* // Définir la destination et le nom du fichier téléchargé
 const storage = multer.diskStorage({
@@ -314,27 +315,92 @@ const GetUser = asyncHandler (async (req, res) => {
   res.status (200).json (req.user);
 });
 
+//             Signup with Facebook
+
+const signupFb = async (req, res, next) => {
+  const name = req.body.name;
+  const email = req.body.email;
+  const imagePath = req.body.imagePath;
+  const password = 'Facebook' + Math.floor (Math.random () * 100000000);
+
+  const userExists = await User.findOne ({email});
+
+  if (userExists) {
+    res.status (400).send ('user exists');
+    throw new Error ('User already exists');
+  }
+
+  const salt = await bcrypt.genSalt (10);
+  const hashedPassword = await bcrypt.hash (password, salt);
+
+  const picture = {
+    data: null,
+    contentType: null,
+    imagePath: imagePath,
+  };
+
+  const user = await User.create ({
+    name,
+    email,
+    password: hashedPassword,
+    picture: picture,
+  });
+
+  if (user) {
+    res.status (201).json ({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      DateOfBirth: user.DateOfBirth,
+      picture: user.picture,
+      token: generateToken (user._id),
+    });
+
+    //sendCredentials(name,email,password)
+  } else {
+    res.status (400).send ('Invalid user data');
+  }
+};
 //             Fetch User By id
 const findById = (req, res, next) => {
   const id = req.params.id;
-  User.findOne({_id: req.params.id})
-    .then(user => {
+  User.findOne ({_id: req.params.id})
+    .then (user => {
       if (user) {
-        res.setHeader('Cache-Control', 'no-cache, no-store');
-        res.setHeader('Expires', '0');
-        res.send(user);
+        res.setHeader ('Cache-Control', 'no-cache, no-store');
+        res.setHeader ('Expires', '0');
+        res.send (user);
       } else {
-        res.status(400).send({message: 'Not found user with id ' + req.params.id});
+        res
+          .status (400)
+          .send ({message: 'Not found user with id ' + req.params.id});
       }
     })
-    .catch(err => {
-      res.status(500).send({
+    .catch (err => {
+      res.status (500).send ({
         message: 'Error retrieving user with id ' + req.params.id,
         error: +err,
       });
     });
 };
+//            GetImagePath
 
+const GetImagePath = async (req, res) => {
+  const id = req.params.id;
+  User.findOne ({_id: id})
+    .then (user => {
+      res.setHeader ('Cache-Control', 'no-cache, no-store');
+      res.setHeader ('Expires', '0');
+      console.log ('yessss ');
+      res.send (user.picture.imagePath);
+    })
+    .catch (err => {
+      res.status (500).send ({
+        message: 'Error retrieving user with id ' + req.params.id,
+        error: +err,
+      });
+    });
+};
 //            Desactivate account
 const desactivateAccount = async (req, res) => {
   try {
@@ -383,6 +449,31 @@ const update = async (req, res) => {
     );
 };
 
+//           Change Password
+
+const changePwd = async (req, res) => {
+  console.log ('Hello from change password');
+  try {
+    const user = await User.findById (req.params.id);
+    if (!user) {
+      return res.status (404).json ({message: 'User not found'});
+    }
+    const {oldPassword, newPassword} = req.body;
+    const isMatch = await bcrypt.compare (oldPassword, user.password);
+    if (!isMatch) {
+      return res.status (400).json ({message: 'Incorrect password'});
+    }
+    const salt = await bcrypt.genSalt (10);
+    const hashedPassword = await bcrypt.hash (newPassword, salt);
+    user.password = hashedPassword;
+    await user.save ();
+    res.json ({message: 'Password updated successfully'});
+  } catch (err) {
+    console.error (err);
+    res.status (500).json ({message: 'Internal server error'});
+  }
+};
+
 //           Update photo profile
 
 const updateImg = async (req, res) => {
@@ -397,9 +488,7 @@ const updateImg = async (req, res) => {
     user.picture.imagePath = req.file.path;
 
     await user.save ();
-    return res
-      .status (200)
-      .json ({msg: 'Profile picture updated successfully'});
+    return res.status (200).json ({user});
   } catch (err) {
     console.log (err);
     return res.status (500).send ('Server Error');
@@ -412,12 +501,12 @@ const findAll = async (req, res, next) => {
   console.log ('hello from get users');
   User.find ()
     .then (users => {
-      res.setHeader('Cache-Control', 'no-cache, no-store');
-      res.setHeader('Expires', '0');
-      res.status(200).send(users);
-      console.log(users);
+      res.setHeader ('Cache-Control', 'no-cache, no-store');
+      res.setHeader ('Expires', '0');
+      res.status (200).send (users);
+      console.log (users);
     })
-    .catch(err => res.status(500).send({message: 'Error retrieving users'}));
+    .catch (err => res.status (500).send ({message: 'Error retrieving users'}));
 };
 /*   ############################  PASSWORD RECOVERY ######################################### */
 
@@ -549,6 +638,7 @@ const verifyCode = async (req, res) => {
 };
 
 /// change pass
+
 const ChangePassword = async (req, res) => {
   console.log (req.body);
   let user = await User.findOne ({otp: req.body.otp});
@@ -566,6 +656,7 @@ const ChangePassword = async (req, res) => {
       res.send ({code: 500, message: 'Server err'});
     });
 };
+
 const submitotp = async (req, res) => {
   console.log (req.body);
   let user = await User.findOne ({otp: req.body.otp});
@@ -632,20 +723,26 @@ const classification = async (req, res) => {
     const userId = req.params.id;
     const level = req.params.level;
 
-    const user = await User.findByIdAndUpdate(userId, { classification: level }, { new: true });
+    const user = await User.findByIdAndUpdate (
+      userId,
+      {classification: level},
+      {new: true}
+    );
 
-    res.json(user);
+    res.json (user);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error (error);
+    res.status (500).json ({message: 'Internal server error'});
   }
-}
-
+};
 
 module.exports = {
   findById,
+  signupFb,
   desactivateAccount,
+  changePwd,
   update,
+  GetImagePath,
   updateImg,
   findAll,
   registerUser,
