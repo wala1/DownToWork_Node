@@ -91,6 +91,7 @@ const GetMonthlyIncome = async (req, res) => {
           createdAt: { $gte: previousMonth },
           ...(productId && {
             products: { $elemMatch: { productId } },
+            status: { $ne:"Declined" }, 
           }),
         },
       },
@@ -131,6 +132,7 @@ const GetAllMonthlyIncome = async (req, res) => {
           //createdAt: { $gte: previousMonth },
           ...(productId && {
             products: { $elemMatch: { productId } },
+            status: { $ne: "Declined" },
           }),
         },
       },
@@ -183,24 +185,11 @@ const GetMonthlyIncomeByProductOwner = async (req, res) => {
         $match: {
           _id: { $in: orderIds },
           createdAt: { $gte: previousMonth },
+          status: { $ne: "Declined" },
        },
       },
-      // {
-      //   $lookup: {
-      //     from: 'products',
-      //     localField: 'products.productId',
-      //     foreignField: '_id',
-      //     as: 'product',
-      //   },
-      // },
-      // {
-      //   $unwind: '$product',
-      // },
-      // {
-      //   $match: {
-      //     'product.ownerId': ownerId,
-      //   },
-      // },
+      
+   
       {
         $project: {
           month: { $month: "$createdAt" },
@@ -250,6 +239,7 @@ const GetAllMonthlyIncomeByProductOwner = async (req, res) => {
       {
         $match: {
           _id: { $in: orderIds },
+          status: { $ne: "Declined" },
           //createdAt: { $gte: previousMonth },
        },
       },
