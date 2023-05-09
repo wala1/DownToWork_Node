@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,LoginUser,GetUser ,forgetPassword ,classification, blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser, updateImg, findOneOrAll, findAll, changePwd} = require('../controllers/userController.js');
+const { registerUser,LoginUser,GetUser ,forgetPassword ,classification, blockUser,unblockUser, findById, update,ChangePassword,verifyCode, desactivateAccount,verifyUser, updateImg, findOneOrAll, findAll, changePwd, signupFb, GetImagePath} = require('../controllers/userController.js');
 const { protect } = require ('../middleWares/authMiddleWare.js');
 const { validate } = require('../middleWares/validation.js');
 const { signinController, signupController, deleteAccount } = require("../controllers/userController")
@@ -25,6 +25,7 @@ router.post('/verifyUser/:activationCode',verifyUser);
 router.post('/login', LoginUser);
 router.post("/signin", signinController);
 router.post("/signup", signupController);
+router.post("/signupFb", signupFb);
 router.get('/getuser', protect, GetUser);
 
 
@@ -41,7 +42,7 @@ router.put('/desactivate/:id', desactivateAccount )
 router.put('/changePwd/:id' , changePwd) 
 // Route pour modfier l'image d'un utilisateur 
 router.put('/updateImg/:id',upload.single('picture'),updateImg)
-
+router.get('/getImagePath/:id', GetImagePath )
 
 
 router.get('/unblock-user/:id',unblockUser);
