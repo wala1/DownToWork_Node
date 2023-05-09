@@ -26,6 +26,14 @@ const PostSchema = mongoose.Schema (
         },
       }
     ],
+     hahaImoji: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
+      }
+    ],
     comments: [
       {
         user: {
