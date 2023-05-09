@@ -6,7 +6,8 @@ const createError = require('http-errors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
+const socketio = require('socket.io')
+const gameLogic = require('./game/game-logic')
 
 const mongodbConnection = require('./config/mongoconnection.json');
 const indexRouter = require('./routes/index');
@@ -20,6 +21,9 @@ const topicsRouter = require('./routes/topic');
 const courseRouter = require('./routes/course');
 const ordersRouter = require('./routes/orders');
 const stripeRouter = require('./routes/stripe');
+const mediaRoutes = require("./routes/media");
+const videoRouter = require("./routes/video");
+
 const cors = require('cors');
 
 const app = express();
@@ -64,8 +68,23 @@ app.use('/checkout' , stripeRouter);
 app.use('/product', productRouter);
 app.use('/courses' , courseRouter);
 app.use('/uploads',express.static('uploads'))
+app.use('/api/v1/media', mediaRoutes);
+app.use('/videosCourses', videoRouter);
+app.use(express.static('public'));
+
 //creation du serveur
 const server = http.createServer(app); 
+const io = socketio(server)
+// get the gameID encoded in the URL. 
+// check to see if that gameID matches with all the games currently in session. 
+// join the existing game session. 
+// create a new session.  
+// run when client connects
+
+io.on('connection', client => {
+  gameLogic.initializeGame(io, client)
+})
+
 server.listen(3001,()=>console.log("server is run")); //port
 
 module.exports = app;
