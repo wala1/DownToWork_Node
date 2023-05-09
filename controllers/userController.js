@@ -73,12 +73,12 @@ const mailConfig = require('../config/configMail.json');
                 secure: false,
                 requireTLS: true,
                 auth: {
-                    user: mailConfig.emailUser,
-                    pass: mailConfig.emailPassword
+                    user: "DownToWork98@gmail.com",
+                    pass: "xhcqnjahqhsgublw"
                 }
             });
             const mailOptions = {
-                from: mailConfig.emailUser,
+                from: "DownToWork98@gmail.com",
                 to: email,
                 subject: 'For account confirmation',
                 // html : '<p> Welcome ' + name + ',Please copy the link <a href="http://localhost:3000/reset-password?token='+token+'">  and reset your password </a>'

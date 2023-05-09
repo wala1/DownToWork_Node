@@ -6,8 +6,8 @@ const transport = nodemailer.createTransport({
             secure:false,
             requireTLS : true,
     auth: {
-      user: "aalimi.wala@gmail.com",
-      pass: "foruremhjhglvwah    ",
+      user: "DownToWork98@gmail.com",
+      pass: "xhcqnjahqhsgublw",
     },
   });
 
@@ -26,8 +26,8 @@ const transport = nodemailer.createTransport({
             secure:false,
             requireTLS : true,
             auth: {
-                user : "aalimi.wala@gmail.com",
-                pass:"foruremhjhglvwah    "
+                user : "DownToWork98@gmail.com",
+                pass:"xhcqnjahqhsgublw"
             }
         });
         const mailOptions = {
