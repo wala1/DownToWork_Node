@@ -188,22 +188,8 @@ const GetMonthlyIncomeByProductOwner = async (req, res) => {
           status: { $ne: "Declined" },
        },
       },
-      // {
-      //   $lookup: {
-      //     from: 'products',
-      //     localField: 'products.productId',
-      //     foreignField: '_id',
-      //     as: 'product',
-      //   },
-      // },
-      // {
-      //   $unwind: '$product',
-      // },
-      // {
-      //   $match: {
-      //     'product.ownerId': ownerId,
-      //   },
-      // },
+      
+   
       {
         $project: {
           month: { $month: "$createdAt" },
