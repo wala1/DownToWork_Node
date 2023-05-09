@@ -121,11 +121,13 @@ exports.liker = async (req, res) => {
 
     const alreadyLiked = post.likes.some((like) => {
      // console.log(like.user.toString());
-      like.user.toString() === userId});
+     return like.user.toString() === userId;});
 
       console.log(alreadyLiked);
     if (alreadyLiked) {
-      return res.status(400).json({ msg: 'Post already liked' });
+      post.likes = post.likes.filter((like) => like.user.toString() !== userId);
+      await post.save();
+      return res.status(200).send(post.likes.length.toString());
     }
 
     post.likes.unshift({ user: userId });
