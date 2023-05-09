@@ -12,14 +12,14 @@ const schemaCourse = new mongoose.Schema({
     },
     Level : {
         type : String , 
+        enum : ["beginner" , "medium" , "advanced"],
         required : true
     },
     imageCourse : {
-        type : String , 
-        required : true
-    },
+        type : String     },
     type : {
         type : String , 
+        enum : ["pdf" , "video" , "game"],
         required : true
     },
     topic : {

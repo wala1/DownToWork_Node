@@ -10,7 +10,7 @@ const postValidator = require ('../middleWares/postValidator')
 router.post("/add" , protect , postValidator, PostController.add)
 
 // Route pour récupérer toutes les publications  de la base de donnèe
-router.get('/getAll', PostController.find);
+router.get('/getAll', PostController.findAll);
 
 // Route pour récupérer toutes les publications  de la base de donnèe
 router.get('/getAllByUser/:id', PostController.findByUser);
@@ -19,7 +19,7 @@ router.get('/getAllByUser/:id', PostController.findByUser);
 router.get('/getById/:id', PostController.find);
 
 // Route pour supprimer une publication  par son ID
-router.delete('/delete/:id', PostController.delete);
+router.delete('/delete/:id', protect , PostController.deletee);
 
 // Route pour modifier une publication par son ID
 router.put('/update/:id', PostController.update);

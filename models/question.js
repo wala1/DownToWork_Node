@@ -6,9 +6,6 @@ const choiceSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  picture: {
-    type: String
-  },
   response: {
     type: Boolean,
     required: true
@@ -30,7 +27,9 @@ const questionSchema = mongoose.Schema({
     required: true
   },
   picture: {
-    type: String
+    data: Buffer,
+    contentType: String,
+    imgUrl: String
   },
   score: {
     type: Number,
@@ -48,8 +47,13 @@ const questionSchema = mongoose.Schema({
     type: [choiceSchema],
     required: true
   },
-  idQuiz: { 
-    type: mongoose.Schema.Types.String, ref: "Quiz" 
+  idQuiz: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Quiz"
+  },
+  idCourse: {
+    type: mongoose.Schema.Types.String,
+    ref: "Course"
   }
 });
 

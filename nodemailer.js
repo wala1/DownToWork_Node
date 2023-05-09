@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require ('nodemailer');
 
 const transport = nodemailer.createTransport({
     host:'smtp.gmail.com',
@@ -47,19 +47,20 @@ const transport = nodemailer.createTransport({
       <li> votre nom d'utilisateur ${name}  </li>
       <li> votre mot de passe ${password}  </li>
       </ul>
-              </div>`
+              </div>`,
+    };
+    transporter.sendMail (mailOptions, function (error, info) {
+      if (error) {
+        console.log (error);
+      } else {
+        console.log ('Mail has been sent', info.response);
+      }
+    });
+  } catch (error) {
+    // res.status(400).send({success:false,msg:error.message});
+  }
+};
 
-        }
-        transporter.sendMail(mailOptions,function(error,info){
-            if(error){
-                console.log(error);
-            }else{
-                console.log("Mail has been sent" , info.response);
-            }
-        });
 
-    }catch(error){
-        // res.status(400).send({success:false,msg:error.message});
-    }
+/*********************************************************************************************************/
 
-  };

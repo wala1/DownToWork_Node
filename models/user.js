@@ -15,13 +15,28 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
     },
-    picture: {
+    statut: {
       type: String,
-      required: [false, 'Please add your picture'],
+      default: 'Web Designer | Architect'
+    },
+    classification:{type: String, enum: ["Beginner", "Intermediate", "Advanced"] },
+    picture: {
+      data: {
+        type: Buffer,
+        default: null
+      },
+      contentType: {
+        type: String,
+        default: null
+      },
+      imagePath: {
+        type: String,
+        default: null
+      }
     },
     googleId: {
       type: String,
-      required: false,
+     // required: false,
     },
     DateOfBirth: {
       type: Date,
