@@ -33,6 +33,7 @@
     "randomstring": "^1.2.3",
     "socket.io": "^4.6.1",
     "stripe": "^11.17.0",
+    "yallist": "^4.0.0",
     "yup": "^1.0.2"
   }
 }
