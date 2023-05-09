@@ -16,15 +16,24 @@ const schemaCourse = new mongoose.Schema({
         required : true
     },
     imageCourse : {
-        type : String     },
+        type : String,
+        // required : true
+    },
     type : {
         type : String , 
         enum : ["pdf" , "video" , "game"],
         required : true
     },
+    pdf: {
+        data: Buffer,
+        contentType: String
+    },
+    videoUrl : {
+      type : String  
+    },
     topic : {
         type : topicSchema,
-        required : true
+        // required : true
     }
 })
 
