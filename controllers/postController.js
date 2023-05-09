@@ -100,3 +100,40 @@ exports.update = async (req, res)=>{
     .then(post => {(!post) ? res.status(404).send({ message : `Cannot Update post with ${id}. Maybe post not found!`}) :res.send(post)})
     .catch(err => res.status(500).send({ message : "Error Update post information" , error : +err}))
 }
+
+//       Liker 
+exports.liker = async (req, res) => {
+  try {
+    console.log('Heyyyyyyyyy i m innnnnnnnnnnnnnnnnnnnnnnnnnn ');
+    console.log(req.params.postId);
+    console.log(req.params.userId);
+
+    const post = await Post.findById(req.params.postId);
+
+    if (!post) {
+      console.log('Post not found' );
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+
+    const userId = req.params.userId;
+    console.log('here is the user id');
+    console.log(userId);
+
+    const alreadyLiked = post.likes.some((like) => {
+     // console.log(like.user.toString());
+      like.user.toString() === userId});
+
+      console.log(alreadyLiked);
+    if (alreadyLiked) {
+      return res.status(400).json({ msg: 'Post already liked' });
+    }
+
+    post.likes.unshift({ user: userId });
+    await post.save();
+    
+    res.send(post.likes.length.toString());
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
