@@ -54,7 +54,13 @@ exports.find = (req, res, next) => {
 }
 
 //**************************** Endpoint to delete a product **************** */
-
+// exports.find = (req, res, next) => {
+// (id) ? Product.findOne({ _id: req.params.id })
+//   .then((product) => { (product) ? res.send(product) : res.status(404).send({ message: "Not found Product with id " + req.params.id }) })
+//   .catch((err) => res.status(500).send({ message: "Error retrieving product with id " + req.params.id, error: +err })) : Product.find()
+//   .then((products) => res.send(products))
+//   .catch((err) => res.send({ message: "Error retrieving products", error: err }))
+// }
 exports.delete = (req, res) => {
     const id = req.params.id;
     Product.findByIdAndDelete(id)
@@ -75,7 +81,7 @@ exports.update = (req, res) => {
     const id = req.params.id;
     //The { useFindAndModify: false} option is used to avoid using the deprecated findAndModify() method
     //The { new: true } option tells Mongoose to return the updated document instead of the original one.
-    Product.findOneAndUpdate({ _id: id }, { prodRate: req.body.prodRate }, { useFindAndModify: false, new: true })
+    Product.findOneAndUpdate({ _id: id }, { prodRate:req.body.prodRate,prodRateNbr:req.body.prodRateNbr }, { useFindAndModify: false, new: true })
         .then(product => { (!product) ? res.status(404).send({ message: `Cannot Update product with ${id}. Maybe product not found!` }) : res.send(product) })
         .catch(err => res.status(500).send({ message: "Error Update product information", error: +err }))
 }
