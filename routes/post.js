@@ -24,5 +24,10 @@ router.delete('/delete/:id', protect , PostController.deletee);
 // Route pour modifier une publication par son ID
 router.put('/update/:id', PostController.update);
 
+// Route pour récupérer une publication  par son ID
+router.post('/liker/:postId/:userId', PostController.liker);
+
+
+
 
 module.exports=router
