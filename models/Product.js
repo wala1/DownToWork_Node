@@ -15,7 +15,8 @@ const ProductSchema = mongoose.Schema({
   prodCateg: { type: String },
   prodReviews: { type: String },
   prodRate: { type: Number ,default:0 },
-  ownerId:{type:String}
+  ownerId:{type:String},
+  prodRateNbr:{type:Number,default:1}
 })
 
 
