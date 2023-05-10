@@ -1,11 +1,18 @@
 const { request } = require('http');
+const pdf2json = require('pdf2json');
 const {schemaCourse ,  Course} = require('../models/Course');
 const {Topic} =  require('../models/Topics');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const pdfjsLib = require('pdfjs-dist');
+
+//#################################### List of Courses ###############################
 async function courseList(req , res , next){
     const course = await Course.find();
     res.send(course);
 };
+//#################################### Add Course ####################################
 async function addCourse(req, res , next){
     const topic = await Topic.findById(req.body.topicId);
     console.log(topic);
@@ -26,6 +33,7 @@ async function addCourse(req, res , next){
     course = await course.save();
     res.send(course);
 };
+//#################################### Update Course #################################
 async function updateCourse(req,res,next){
     const course = Course.findByIdAndUpdate(req.params.id, 
         {
@@ -40,11 +48,13 @@ async function updateCourse(req,res,next){
     if(!course) return res.status(400).send("The course does not exist");
     res.send(course);
 };
+//#################################### Search Course By Id  ##########################
 async function getCourse(req,res){
     const course = Course.findById(req.params.id);
     if(!course) return res.status(400).send("The course does not exist");
     res.send(course);
 };
+//#################################### Search Course By Type #########################
 async function findCourseByType(req,res){
     const type = req.params.type;
     console.log(type);
@@ -53,6 +63,7 @@ async function findCourseByType(req,res){
     if(!courses) return res.status(400).send("There is not courses with this type");
     res.json(courses);
 };
+//#################################### Search Course By Topic ########################
 async function findCourseByTopic(req,res){
     const topicName = req.params.topicName;
     console.log(topicName);
@@ -61,37 +72,75 @@ async function findCourseByTopic(req,res){
     if(!courses) return res.status(400).send("There is not courses with this type");
     res.json(courses);
 };
+//#################################### Search Course By Topic and Level ########################
+async function findCourseByTopicAndLevel(req, res) {
+    const topicName = req.params.topicName;
+    const level = req.params.level;
+    const courses = await Course.find({
+      "topic.topicName": topicName,
+      "Level": level
+    }).lean();
+    if (!courses) return res.status(404).send("There are no courses with this topic and level");
+    res.json(courses);
+  }
+  
+//#################################### Delete Course #################################
 async function deleteCourse(req , res){
-    const course = Course.findByIdAndRemove(req.params.id);
-    if(!course) return res.status(400).send("The course does not exist");
-    res.send(course);
+    const course =await  Course.findByIdAndRemove(req.params.id);
+    if(!course) return res.status(404).send("The course does not exist");
+    res.send("The Course : "+ course.nameCourse + " is deleted successfully");
 };
+//#################################### Add Course + Upload Pdf #######################
+async function AddCoursePdf(req, res){
 
-async function getALLCourses(req , res){
-    try {
-        const courses = await Course.find();
-        res.status(200).json({
-          message: "Courses fetched successfully!",
-          courses: courses
-        });
-      } catch (error) {
-        res.status(400).send({ success: false, msg: error.message });
-      }
-};
-
-async function downloadPdf(req,res){
-    res.download('./uploads/image.png');
-
-}
-async function uploadFile(req,res){
-    console.log('request file : ' , req.file);
-    console.log('request body : ' , req.body);
-    res.json({
-        fullName : req.body.fullName,
-        asset : req.file.path
+    // Lecture du fichier PDF téléchargé et conversion en buffer
+    const pdfPath = path.join("D:/PI/DownToWork_Node/", '/uploads', req.file.originalname);
+    console.log("this is what i am looking for "+ req.file.originalname);    
+    const dataBuffer = fs.readFileSync(pdfPath);
+    const topic = await Topic.findById(req.body.topicId);
+    console.log(topic);
+    if(!topic) return res.status(400).send("Topic is not found");
+    const { nameCourse, descriptionCourse,Level ,imageCourse,type,videoUrl} = req.body;
+  
+    // Enregistrez le fichier PDF dans la base de données MongoDB
+    let cours = new Course({
+         nameCourse,
+         descriptionCourse,
+         Level,
+         imageCourse,
+         type,
+         videoUrl,
+         topic : {
+            _id : topic.id,
+            topicName : topic.topicName,
+            topicImg : topic.topicImg,
+            TopicDesc : topic.TopicDesc
+        },
+         pdf: {
+             data: dataBuffer,
+             contentType: 'application/pdf'
+        }
     })
-
-}
+    await cours.save();
+    res.send(cours);
+};
+//#################################### download Course ##############################
+async function downloadCoursePdf(req, res) {
+    try {
+      const courseId = req.params.courseId;
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).send('Course not found');
+      }
+  
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=${course.nameCourse}.pdf`);
+      res.send(course.pdf.data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+    }
+  }
 exports.addCourse = addCourse;
 exports.updateCourse = updateCourse;
 exports.getCourse = getCourse;
@@ -99,6 +148,6 @@ exports.deleteCourse = deleteCourse;
 exports.courseList = courseList;
 exports.findCourseByType = findCourseByType;
 exports.findCourseByTopic = findCourseByTopic;
-exports.downloadPdf = downloadPdf;
-exports.uploadFile = uploadFile;
-exports.getALLCourses = getALLCourses;
+exports.AddCoursePdf = AddCoursePdf;
+exports.downloadCoursePdf = downloadCoursePdf;
+exports.findCourseByTopicAndLevel = findCourseByTopicAndLevel;
